@@ -18,6 +18,7 @@ import {
 import { useApp } from "@/context/AppContext";
 import { NavSection } from "@/lib/types";
 import { WeatherStateView } from "./weather/WeatherStateView";
+import { CitizenDashboard } from "./citizen/CitizenDashboard";
 
 const SECTION_ICONS: Record<NavSection, React.ReactNode> = {
   citizen: <Users className="h-6 w-6 text-cyan-400" />,
@@ -54,90 +55,97 @@ export const SectionShell: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 lg:pb-6">
-      {/* Active Module & City Banner */}
-      <div
-        className={`relative overflow-hidden rounded-3xl border p-6 sm:p-8 backdrop-blur-xl shadow-xl transition-all duration-300 ${
-          isEmergency
-            ? "border-rose-500/30 bg-gradient-to-br from-rose-950/40 via-slate-900/60 to-slate-950/80"
-            : "border-slate-700/50 bg-gradient-to-br from-slate-900/70 via-[#0D1B2A]/60 to-[#07111F]/80"
-        }`}
-      >
-        {/* Subtle background ambient glow */}
-        <div
-          className={`pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl opacity-20 ${
-            isEmergency ? "bg-rose-500" : "bg-cyan-500"
-          }`}
-        />
-
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4 sm:gap-5">
+      {/* If Citizen section: Render specialized complete Citizen Weather Dashboard */}
+      {activeSection === "citizen" ? (
+        <CitizenDashboard />
+      ) : (
+        <>
+          {/* Active Module & City Banner for non-citizen modules */}
+          <div
+            className={`relative overflow-hidden rounded-3xl border p-6 sm:p-8 backdrop-blur-xl shadow-xl transition-all duration-300 ${
+              isEmergency
+                ? "border-rose-500/30 bg-gradient-to-br from-rose-950/40 via-slate-900/60 to-slate-950/80"
+                : "border-slate-700/50 bg-gradient-to-br from-slate-900/70 via-[#0D1B2A]/60 to-[#07111F]/80"
+            }`}
+          >
+            {/* Subtle background ambient glow */}
             <div
-              className={`flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border shadow-inner ${
-                isEmergency
-                  ? "border-rose-500/40 bg-rose-950/60 text-rose-300"
-                  : "border-cyan-500/30 bg-slate-800/80 text-cyan-300"
+              className={`pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl opacity-20 ${
+                isEmergency ? "bg-rose-500" : "bg-cyan-500"
               }`}
-            >
-              {SECTION_ICONS[activeSection]}
-            </div>
+            />
 
-            <div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  {sectionInfo.label}
-                </h1>
-                <span className="text-sm sm:text-base font-semibold text-cyan-600 dark:text-cyan-400">
-                  {sectionInfo.sub}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
+            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4 sm:gap-5">
+                <div
+                  className={`flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border shadow-inner ${
                     isEmergency
-                      ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
-                      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      ? "border-rose-500/40 bg-rose-950/60 text-rose-300"
+                      : "border-cyan-500/30 bg-slate-800/80 text-cyan-300"
                   }`}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-                  {t.section.statusBadge}
-                </span>
+                  {SECTION_ICONS[activeSection]}
+                </div>
+
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                      {sectionInfo.label}
+                    </h1>
+                    <span className="text-sm sm:text-base font-semibold text-cyan-600 dark:text-cyan-400">
+                      {sectionInfo.sub}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
+                        isEmergency
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      }`}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                      {t.section.statusBadge}
+                    </span>
+                  </div>
+
+                  <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                    {sectionInfo.desc}
+                  </p>
+                </div>
               </div>
 
-              <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-                {sectionInfo.desc}
-              </p>
+              {/* Active City & Coordinates Pill */}
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 shrink-0">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-slate-400">
+                      {t.section.activeLocation}
+                    </span>
+                    <span className="text-sm font-bold text-slate-100">
+                      {cityName}, {stateName}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l lg:border-t lg:border-l-0 border-slate-800 pt-2 sm:pt-0 sm:pl-3 lg:pt-2 lg:pl-0">
+                  <Compass className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {t.section.coordinatesLabel}
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-cyan-300">
+                      {city.lat.toFixed(4)}° N, {city.lon.toFixed(4)}° E
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Active City & Coordinates Pill */}
-          <div className="flex flex-col sm:flex-row lg:flex-col gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 shrink-0">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-cyan-400 shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-400">
-                  {t.section.activeLocation}
-                </span>
-                <span className="text-sm font-bold text-slate-100">
-                  {cityName}, {stateName}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l lg:border-t lg:border-l-0 border-slate-800 pt-2 sm:pt-0 sm:pl-3 lg:pt-2 lg:pl-0">
-              <Compass className="h-4 w-4 text-emerald-400 shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-[10px] text-slate-400 font-medium">
-                  {t.section.coordinatesLabel}
-                </span>
-                <span className="font-mono text-xs font-semibold text-cyan-300">
-                  {city.lat.toFixed(4)}° N, {city.lon.toFixed(4)}° E
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Live Open-Meteo Weather Telemetry View */}
-      <WeatherStateView />
+          {/* Telemetry Overview */}
+          <WeatherStateView />
+        </>
+      )}
 
       {/* Module Capabilities & Architecture Highlights */}
       <div className="space-y-4">
