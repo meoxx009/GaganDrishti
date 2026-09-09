@@ -19,6 +19,7 @@ import { useApp } from "@/context/AppContext";
 import { NavSection } from "@/lib/types";
 import { WeatherStateView } from "./weather/WeatherStateView";
 import { CitizenDashboard } from "./citizen/CitizenDashboard";
+import { FarmerDashboard } from "./farmer/FarmerDashboard";
 
 const SECTION_ICONS: Record<NavSection, React.ReactNode> = {
   citizen: <Users className="h-6 w-6 text-cyan-400" />,
@@ -58,6 +59,8 @@ export const SectionShell: React.FC = () => {
       {/* If Citizen section: Render specialized complete Citizen Weather Dashboard */}
       {activeSection === "citizen" ? (
         <CitizenDashboard />
+      ) : activeSection === "farmer" ? (
+        <FarmerDashboard />
       ) : (
         <>
           {/* Active Module & City Banner for non-citizen modules */}
