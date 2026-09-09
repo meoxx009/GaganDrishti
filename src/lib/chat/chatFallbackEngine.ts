@@ -2,6 +2,7 @@ import { Language, City } from "@/lib/types";
 import { NormalizedWeatherData } from "@/lib/weather/types";
 import { CropId, StageId, CROPS, STAGES } from "@/lib/weather/farmerTypes";
 import { evaluateFarmerWeatherAdvisory } from "@/lib/weather/farmerDecisionEngine";
+import { interpretWMOCode } from "@/lib/weather/wmo";
 
 export function getDeterministicFallbackReply(
   query: string,
@@ -55,13 +56,19 @@ export function getDeterministicFallbackReply(
       if (isHindi) return `कल के लिए विस्तृत दैनिक वर्षा डेटा अभी संकलित किया जा रहा है।`;
       return `Tomorrow's detailed precipitation telemetry is currently compiling.`;
     }
-    const rainChance = tomorrowDaily.precipitationProbabilityMax;
-    const rainMm = tomorrowDaily.precipitationSum;
+    const rainChance = tomorrowDaily.precipitationProbabilityMax ?? 0;
+    const rainMm = tomorrowDaily.precipitationSum ?? 0;
+    const dateObj = tomorrowDaily.date ? new Date(tomorrowDaily.date + "T00:00:00+05:30") : null;
+    const dayNameHi = tomorrowDaily.dayNameHi || (dateObj ? ` (${dateObj.toLocaleDateString("hi-IN", { weekday: "short" })})` : "");
+    const dayNameEn = tomorrowDaily.dayNameEn || (dateObj ? ` (${dateObj.toLocaleDateString("en-IN", { weekday: "short" })})` : "");
+    const wmo = interpretWMOCode(tomorrowDaily.weatherCode ?? 1);
+    const condHi = tomorrowDaily.conditionHi || wmo.conditionHi;
+    const condEn = tomorrowDaily.conditionEn || wmo.conditionEn;
 
     if (isHindi) {
-      return `कल (${tomorrowDaily.dayNameHi}) ${cityName} में वर्षा की अधिकतम संभावना ${rainChance}% है और लगभग ${rainMm} मिमी वर्षा का अनुमान है। मौसम मुख्य रूप से ${tomorrowDaily.conditionHi} रहेगा।`;
+      return `कल${dayNameHi ? ` ${dayNameHi}` : ""} ${cityName} में वर्षा की अधिकतम संभावना ${rainChance}% है और लगभग ${rainMm} मिमी वर्षा का अनुमान है। मौसम मुख्य रूप से ${condHi} रहेगा।`;
     }
-    return `Tomorrow (${tomorrowDaily.dayNameEn}) in ${cityName}, there is a ${rainChance}% maximum probability of rain with an estimated ${rainMm} mm precipitation. Expect ${tomorrowDaily.conditionEn.toLowerCase()} conditions.`;
+    return `Tomorrow${dayNameEn ? ` ${dayNameEn}` : ""} in ${cityName}, there is a ${rainChance}% maximum probability of rain with an estimated ${rainMm} mm precipitation. Expect ${condEn.toLowerCase()} conditions.`;
   }
 
   // 3. Today's Rain
