@@ -22,6 +22,7 @@ import { CitizenDashboard } from "./citizen/CitizenDashboard";
 import { FarmerDashboard } from "./farmer/FarmerDashboard";
 import { WeatherRiskDashboard } from "./alerts/WeatherRiskDashboard";
 import { AskChat } from "./ask/AskChat";
+import { EmergencyDashboard } from "./emergency/EmergencyDashboard";
 
 const SECTION_ICONS: Record<NavSection, React.ReactNode> = {
   citizen: <Users className="h-6 w-6 text-cyan-400" />,
@@ -67,6 +68,8 @@ export const SectionShell: React.FC = () => {
         <WeatherRiskDashboard />
       ) : activeSection === "ask" ? (
         <AskChat />
+      ) : activeSection === "emergency" ? (
+        <EmergencyDashboard />
       ) : (
         <>
           {/* Active Module & City Banner for non-citizen modules */}

@@ -57,7 +57,7 @@ export const MobileNav: React.FC = () => {
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               type="button"
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl min-h-[48px] min-w-[52px] transition-all ${
                 isActive
                   ? item.isEmergency
                     ? "text-rose-400 bg-rose-950/40 border border-rose-500/30"
