@@ -14,10 +14,18 @@ import {
   HelpCircle,
   Loader2,
   Info,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Square,
+  Radio,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useWeather } from "@/context/WeatherContext";
 import { ChatMessage, ChatApiResponse } from "@/lib/chat/types";
+import { useSpeechRecognition } from "@/lib/speech/useSpeechRecognition";
+import { useSpeechSynthesis } from "@/lib/speech/useSpeechSynthesis";
 
 const SUGGESTED_QUESTIONS_EN = [
   "Will it rain today?",
@@ -48,6 +56,42 @@ export const AskChat: React.FC = () => {
 
   const cityName = language === "hi" ? city.nameHi : city.nameEn;
   const stateName = language === "hi" ? city.stateHi : city.stateEn;
+
+  // Speech Recognition (STT - en-IN / hi-IN)
+  const {
+    isSupported: isSpeechSupported,
+    isListening,
+    interimTranscript,
+    error: speechError,
+    startListening,
+    stopListening,
+    clearError: clearSpeechError,
+  } = useSpeechRecognition({
+    language,
+    onFinalTranscript: (transcript) => {
+      setInputQuery((prev) => {
+        const trimmed = prev.trim();
+        return trimmed ? `${trimmed} ${transcript}` : transcript;
+      });
+    },
+  });
+
+  // Speech Synthesis (TTS - en-IN / hi-IN)
+  const {
+    isSupported: isSynthSupported,
+    currentlySpeakingId,
+    speak,
+    stop: stopSpeech,
+  } = useSpeechSynthesis();
+
+  const handleMicToggle = () => {
+    if (!isSpeechSupported) return;
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   // Initialize initial greeting
   useEffect(() => {
@@ -237,6 +281,44 @@ export const AskChat: React.FC = () => {
                     isUser ? "text-cyan-100/70" : "text-slate-500"
                   }`}
                 >
+                  {/* Speaker Button on Assistant Replies */}
+                  {!isUser && isSynthSupported && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentlySpeakingId === msg.id) {
+                          stopSpeech();
+                        } else {
+                          speak(msg.id, msg.content, language);
+                        }
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[10px] font-medium transition-all ${
+                        currentlySpeakingId === msg.id
+                          ? "border border-cyan-400/50 bg-cyan-500/20 text-cyan-300 shadow-sm shadow-cyan-500/30 animate-pulse"
+                          : "border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 hover:text-cyan-300"
+                      }`}
+                      title={
+                        currentlySpeakingId === msg.id
+                          ? (language === "hi" ? "आवाज़ रोकें (Stop)" : "Stop audio")
+                          : (language === "hi" ? "उत्तर सुनें (Listen in Hindi)" : "Listen to reply (English)")
+                      }
+                    >
+                      {currentlySpeakingId === msg.id ? (
+                        <>
+                          <Square className="h-2.5 w-2.5 fill-current text-cyan-300" />
+                          <span className="font-semibold text-cyan-300">
+                            {language === "hi" ? "रोकें" : "Stop"}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="h-3 w-3" />
+                          <span>{language === "hi" ? "सुनें" : "Listen"}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   {/* Subtle Fallback Indicator */}
                   {!isUser && msg.isFallback && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-medium text-cyan-400/90 bg-cyan-950/40 px-2 py-0.5 rounded-md border border-cyan-500/20">
@@ -317,7 +399,48 @@ export const AskChat: React.FC = () => {
       </div>
 
       {/* 4. Chat Input Bar */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/60">
+      <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 space-y-3">
+        {/* Active Speech Recognition Banner */}
+        {isListening && (
+          <div className="flex items-center gap-2 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-3.5 py-2.5 text-xs text-rose-300 shadow-lg shadow-rose-950/40 animate-pulse">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
+            </span>
+            <span className="font-semibold shrink-0">
+              {language === "hi" ? "सुन रहे हैं (hi-IN):" : "Listening (en-IN):"}
+            </span>
+            <span className="italic text-slate-200 truncate">
+              {interimTranscript || (language === "hi" ? "कृपया बोलें..." : "Speak now...")}
+            </span>
+            <button
+              type="button"
+              onClick={stopListening}
+              className="ml-auto rounded-lg bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[11px] font-bold text-rose-200 hover:bg-rose-500/40 transition-colors shrink-0"
+            >
+              {language === "hi" ? "पूर्ण करें" : "Done"}
+            </button>
+          </div>
+        )}
+
+        {/* Speech Error Banner */}
+        {speechError && (
+          <div className="flex items-center justify-between gap-2 rounded-2xl border border-amber-500/40 bg-amber-950/30 px-3.5 py-2 text-xs text-amber-300">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+              <span>{speechError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={clearSpeechError}
+              className="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded-md hover:bg-slate-800 transition-colors"
+              title="Dismiss error"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -330,7 +453,11 @@ export const AskChat: React.FC = () => {
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             placeholder={
-              language === "hi"
+              isListening
+                ? language === "hi"
+                  ? "सुन रहे हैं... बोलें"
+                  : "Listening... speak now"
+                : language === "hi"
                 ? `${cityName} के मौसम या खेती पर प्रश्न पूछें...`
                 : `Ask about weather, rain, or farming in ${cityName}...`
             }
@@ -338,6 +465,48 @@ export const AskChat: React.FC = () => {
             className="flex-1 rounded-2xl border border-slate-700/80 bg-slate-950 px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 disabled:opacity-50"
           />
 
+          {/* Microphone (Speech-to-Text) Button */}
+          <button
+            type="button"
+            onClick={handleMicToggle}
+            disabled={!isSpeechSupported || isLoading}
+            className={`relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border transition-all shrink-0 ${
+              isListening
+                ? "border-rose-500 bg-rose-500/20 text-rose-300 shadow-lg shadow-rose-500/30 animate-pulse"
+                : !isSpeechSupported
+                ? "border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed"
+                : "border-slate-700/80 bg-slate-900/80 text-cyan-400 hover:border-cyan-500 hover:bg-slate-800"
+            }`}
+            title={
+              !isSpeechSupported
+                ? language === "hi"
+                  ? "इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है"
+                  : "Voice input not supported in this browser"
+                : isListening
+                ? language === "hi"
+                  ? "सुनना रोकें"
+                  : "Stop listening"
+                : language === "hi"
+                ? "बोलकर पूछें (Hindi - hi-IN)"
+                : "Speak your query (English - en-IN)"
+            }
+          >
+            {isListening ? (
+              <>
+                <Mic className="h-5 w-5 text-rose-400 animate-bounce" />
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
+                </span>
+              </>
+            ) : !isSpeechSupported ? (
+              <MicOff className="h-5 w-5" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
+          </button>
+
+          {/* Send Button */}
           <button
             type="submit"
             disabled={!inputQuery.trim() || isLoading}
@@ -351,6 +520,49 @@ export const AskChat: React.FC = () => {
             )}
           </button>
         </form>
+      </div>
+
+      {/* 5. Device Support Notice */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 bg-slate-950/70 px-4 py-2 text-[10px] text-slate-400">
+        <div className="flex items-center gap-1.5">
+          <Radio className="h-3 w-3 text-cyan-400 shrink-0" />
+          <span>
+            {language === "hi"
+              ? "वॉइस पहचान (hi-IN) एवं वाक् आउटपुट ब्राउज़र/डिवाइस समर्थन (Chrome, Edge, Safari) पर निर्भर करता है।"
+              : "Voice recognition (en-IN) & speech output depend on browser/device support (Chrome, Edge, Safari)."}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 ${
+              isSpeechSupported ? "text-emerald-400" : "text-amber-400"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {isSpeechSupported
+              ? language === "hi"
+                ? "माइक उपलब्ध"
+                : "Mic Ready"
+              : language === "hi"
+              ? "माइक असमर्थित"
+              : "Mic Unsupported"}
+          </span>
+          <span className="text-slate-700">•</span>
+          <span
+            className={`inline-flex items-center gap-1 ${
+              isSynthSupported ? "text-emerald-400" : "text-amber-400"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {isSynthSupported
+              ? language === "hi"
+                ? "स्पीकर उपलब्ध"
+                : "Speaker Ready"
+              : language === "hi"
+              ? "स्पीकर असमर्थित"
+              : "Speaker Unsupported"}
+          </span>
+        </div>
       </div>
     </div>
   );
