@@ -1,42 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { SectionShell } from "./SectionShell";
-import { APP_CONFIG, NAV_ITEMS } from "@/lib/constants";
-import { NavSection } from "@/lib/types";
+import { MobileNav } from "./MobileNav";
+import { useApp } from "@/context/AppContext";
 
 export const Shell: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<NavSection>("citizen");
-
-  const currentNavItem =
-    NAV_ITEMS.find((item) => item.id === activeSection) || NAV_ITEMS[0];
+  const { t } = useApp();
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-white">
-      {/* Header with Brand, Badge, and Nav Tabs */}
-      <Header
-        navItems={NAV_ITEMS}
-        activeSection={activeSection}
-        onSelectSection={setActiveSection}
-      />
+    <div className="min-h-screen flex bg-[#f8fafc] dark:bg-[#07111F] text-slate-900 dark:text-slate-100 transition-colors">
+      {/* Desktop Left Sidebar */}
+      <Sidebar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <SectionShell section={currentNavItem} />
-      </main>
+      {/* Main Layout Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Sticky Top Header */}
+        <Header />
 
-      {/* Application Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p>
-            {APP_CONFIG.brand} ({APP_CONFIG.brandHindi}) — {APP_CONFIG.badge}
-          </p>
-          <p className="mt-1 text-slate-600">
-            Engineered for Smart India Hackathon (SIH) 2026. Next.js App Router Architecture.
-          </p>
-        </div>
-      </footer>
+        {/* Dynamic Section Content */}
+        <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <SectionShell />
+        </main>
+
+        {/* Application Footer */}
+        <footer className="border-t border-slate-700/40 bg-slate-100 dark:bg-[#0D1B2A]/60 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-1">
+            <p className="font-semibold text-slate-700 dark:text-slate-300">
+              {t.footer.sihNote}
+            </p>
+            <p className="text-[11px] text-slate-500">
+              {t.footer.techStack}
+            </p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 pt-1">
+              {t.footer.copyright}
+            </p>
+          </div>
+        </footer>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileNav />
+      </div>
     </div>
   );
 };

@@ -1,85 +1,98 @@
+"use client";
+
 import React from "react";
-import { CloudSun, Radio } from "lucide-react";
-import { APP_CONFIG } from "@/lib/constants";
-import { NavItem, NavSection } from "@/lib/types";
+import { Sun, Moon, Globe, Radio } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { CitySelector } from "./CitySelector";
+import { ISTClock } from "./ISTClock";
 
-interface HeaderProps {
-  navItems: NavItem[];
-  activeSection: NavSection;
-  onSelectSection: (section: NavSection) => void;
-}
+export const Header: React.FC = () => {
+  const { language, setLanguage, theme, toggleTheme, t } = useApp();
 
-export const Header: React.FC<HeaderProps> = ({
-  navItems,
-  activeSection,
-  onSelectSection,
-}) => {
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        {/* Brand & Badge */}
+    <header className="sticky top-0 z-40 border-b border-slate-700/40 bg-slate-900/85 dark:bg-[#07111F]/85 backdrop-blur-xl transition-colors">
+      <div className="mx-auto flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8 gap-3">
+        {/* Left Area: Mobile Brand & Badge + City Selector */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20">
-            <CloudSun className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold tracking-tight text-white">
-                {APP_CONFIG.brand}
+          {/* Mobile Only Brand Icon */}
+          <div className="flex lg:hidden items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-500 to-blue-600 text-white shadow-md">
+              <Radio className="h-5 w-5 animate-pulse" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                {t.brand.title}
               </span>
-              <span className="text-xs font-medium text-cyan-400">
-                {APP_CONFIG.brandHindi}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-950/60 px-2.5 py-0.5 text-xs font-semibold text-cyan-300">
-                {APP_CONFIG.badge}
+              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                {t.brand.badge}
               </span>
             </div>
-            <p className="hidden text-xs text-slate-400 sm:block">
-              {APP_CONFIG.tagline}
-            </p>
           </div>
+
+          {/* Global City Selector */}
+          <CitySelector />
         </div>
 
-        {/* System Status */}
-        <div className="hidden items-center gap-2 md:flex">
-          <span className="flex h-2 w-2 relative">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-          </span>
-          <span className="text-xs font-medium text-slate-400">System Ready</span>
-        </div>
-      </div>
+        {/* Center/Right Area: Live Feeds Status, IST Clock, Language Toggle, Theme Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live Weather Status Indicator (Desktop/Tablet) */}
+          <div className="hidden md:flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="font-medium">{t.header.liveFeeds}</span>
+            <span className="opacity-60">•</span>
+            <span className="font-semibold">{t.header.systemActive}</span>
+          </div>
 
-      {/* Navigation Bar */}
-      <div className="border-t border-slate-800/80 bg-slate-900/50">
-        <div className="mx-auto flex max-w-7xl overflow-x-auto px-4 py-2 sm:px-6 lg:px-8 scrollbar-none">
-          <nav className="flex space-x-1 sm:space-x-2">
-            {navItems.map((item) => {
-              const isActive = activeSection === item.id;
-              const isEmergency = item.id === "emergency";
+          {/* Live IST Clock */}
+          <ISTClock />
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onSelectSection(item.id)}
-                  type="button"
-                  className={`group relative flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-150 ${
-                    isActive
-                      ? isEmergency
-                        ? "bg-rose-500/15 text-rose-300 border border-rose-500/40"
-                        : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/40"
-                      : isEmergency
-                      ? "text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 border border-transparent"
-                      : "text-slate-300 hover:bg-slate-800/60 hover:text-white border border-transparent"
-                  }`}
-                >
-                  {isEmergency && <Radio className="h-3.5 w-3.5 animate-pulse text-rose-400" />}
-                  <span>{item.label}</span>
-                  <span className="text-xs opacity-60">({item.hindiLabel})</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* Language Switch: English / हिन्दी */}
+          <div className="flex items-center rounded-xl border border-slate-700/60 bg-slate-800/40 dark:bg-slate-900/80 p-0.5">
+            <button
+              onClick={() => setLanguage("en")}
+              type="button"
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                language === "en"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+              title="Switch to English"
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLanguage("hi")}
+              type="button"
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                language === "hi"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+              title="हिंदी में बदलें"
+            >
+              हिन्दी
+            </button>
+          </div>
+
+          {/* Dark / Light Mode Switch */}
+          <button
+            onClick={toggleTheme}
+            type="button"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-700/60 bg-slate-800/40 dark:bg-slate-900/80 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50 transition-all"
+            title={`${t.header.toggleTheme} (${
+              theme === "dark" ? t.header.lightMode : t.header.darkMode
+            })`}
+            aria-label="Toggle Theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4 text-amber-400 hover:rotate-45 transition-transform" />
+            ) : (
+              <Moon className="h-4 w-4 text-indigo-500 hover:-rotate-12 transition-transform" />
+            )}
+          </button>
         </div>
       </div>
     </header>
