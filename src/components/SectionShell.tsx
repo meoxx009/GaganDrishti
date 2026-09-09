@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { NavSection } from "@/lib/types";
+import { WeatherStateView } from "./weather/WeatherStateView";
 
 const SECTION_ICONS: Record<NavSection, React.ReactNode> = {
   citizen: <Users className="h-6 w-6 text-cyan-400" />,
@@ -134,6 +135,9 @@ export const SectionShell: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Live Open-Meteo Weather Telemetry View */}
+      <WeatherStateView />
 
       {/* Module Capabilities & Architecture Highlights */}
       <div className="space-y-4">

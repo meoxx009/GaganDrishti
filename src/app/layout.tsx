@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
+import { WeatherProvider } from "@/context/WeatherContext";
 
 export const metadata: Metadata = {
   title: "GaganDrishti | SIH 2026 Prototype",
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="min-h-screen antialiased selection:bg-cyan-500 selection:text-white">
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          <WeatherProvider>{children}</WeatherProvider>
+        </AppProvider>
       </body>
     </html>
   );

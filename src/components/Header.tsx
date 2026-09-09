@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import { Sun, Moon, Globe, Radio } from "lucide-react";
+import { Sun, Moon, Globe, Radio, RefreshCw, Database } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { useWeather } from "@/context/WeatherContext";
 import { CitySelector } from "./CitySelector";
 import { ISTClock } from "./ISTClock";
 
 export const Header: React.FC = () => {
   const { language, setLanguage, theme, toggleTheme, t } = useApp();
+  const { weather, isRefreshing, refreshWeather } = useWeather();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-700/40 bg-slate-900/85 dark:bg-[#07111F]/85 backdrop-blur-xl transition-colors">
@@ -36,14 +38,34 @@ export const Header: React.FC = () => {
         {/* Center/Right Area: Live Feeds Status, IST Clock, Language Toggle, Theme Toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Live Weather Status Indicator (Desktop/Tablet) */}
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="font-medium">{t.header.liveFeeds}</span>
-            <span className="opacity-60">•</span>
-            <span className="font-semibold">{t.header.systemActive}</span>
+          <div className="hidden md:flex items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-800/40 dark:bg-slate-900/80 px-2.5 py-1 text-xs">
+            <div className="flex items-center gap-1.5 text-cyan-400">
+              <Database className="h-3.5 w-3.5 text-cyan-400" />
+              <span className="font-semibold text-[11px]">Open-Meteo</span>
+            </div>
+            <span className="text-slate-500">•</span>
+            {weather?.isCached ? (
+              <span className="text-[11px] font-medium text-amber-400">
+                {language === "hi" ? "कैश्ड" : "Cached"}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span>{language === "hi" ? "लाइव" : "Live"}</span>
+              </span>
+            )}
+            <button
+              onClick={() => refreshWeather(true)}
+              disabled={isRefreshing}
+              className="ml-1 rounded-md p-1 text-slate-400 hover:text-white transition-colors disabled:opacity-40"
+              title={language === "hi" ? "रिफ्रेश करें" : "Refresh Telemetry"}
+            >
+              <RefreshCw
+                className={`h-3 w-3 ${
+                  isRefreshing ? "animate-spin text-cyan-400" : ""
+                }`}
+              />
+            </button>
           </div>
 
           {/* Live IST Clock */}
