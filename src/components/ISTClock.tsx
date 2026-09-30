@@ -47,8 +47,8 @@ export const ISTClock: React.FC = () => {
 
   if (!isMounted) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-slate-700/40 bg-slate-900/40 dark:bg-slate-900/60 px-3 py-1.5 text-xs text-slate-400">
-        <Clock className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
+      <div className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#060C12] px-3 py-1.5 text-xs text-slate-400">
+        <Clock className="h-3.5 w-3.5 text-sky-500 animate-pulse" />
         <span className="font-mono">--:--:-- IST</span>
       </div>
     );
@@ -56,19 +56,19 @@ export const ISTClock: React.FC = () => {
 
   return (
     <div
-      className="flex items-center gap-2.5 rounded-xl border border-slate-700/50 bg-slate-800/40 dark:bg-slate-900/70 px-3 py-1.5 text-xs shadow-xs"
+      className="flex items-center gap-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-100/80 dark:bg-[#060C12] px-3 py-1.5 text-xs shadow-xs"
       title={`Indian Standard Time (Asia/Kolkata) - ${dateStr}`}
     >
-      <Clock className="h-3.5 w-3.5 text-cyan-400" />
+      <Clock className="h-3.5 w-3.5 text-sky-500 shrink-0" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-        <span className="font-mono font-semibold tracking-wider text-slate-800 dark:text-cyan-300">
+        <span className="font-mono font-semibold tracking-wider text-slate-800 dark:text-[#F8FAFC]">
           {timeStr}
         </span>
-        <span className="text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-1 rounded">
+        <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-sky-400 bg-sky-500/10 px-1 rounded">
           IST
         </span>
       </div>
-      <span className="hidden xl:inline-block text-[11px] text-slate-500 dark:text-slate-400 border-l border-slate-700/60 pl-2">
+      <span className="hidden xl:inline-block text-[11px] text-slate-500 dark:text-[#7F91A3] border-l border-slate-300 dark:border-slate-800/80 pl-2">
         {dateStr}
       </span>
     </div>

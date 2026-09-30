@@ -20,12 +20,14 @@ import {
   VolumeX,
   Square,
   Radio,
+  ShieldCheck,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useWeather } from "@/context/WeatherContext";
 import { ChatMessage, ChatApiResponse } from "@/lib/chat/types";
 import { useSpeechRecognition } from "@/lib/speech/useSpeechRecognition";
 import { useSpeechSynthesis } from "@/lib/speech/useSpeechSynthesis";
+import { EvidenceProvenanceDrawer, EvidenceDetails } from "@/components/common/EvidenceProvenanceDrawer";
 
 const SUGGESTED_QUESTIONS_EN = [
   "Will it rain today?",
@@ -43,6 +45,14 @@ const SUGGESTED_QUESTIONS_HI = [
   "क्या आज फसल पर स्प्रे करने के लिए मौसम उपयुक्त है?",
 ];
 
+const SUGGESTED_QUESTIONS_MR = [
+  "आज पाऊस पडेल का?",
+  "सध्याचे तापमान आणि आर्द्रता किती आहे?",
+  "उद्याचे हवामान कसे राहील?",
+  "आज शेतात पाणी देणे योग्य ठरेल का?",
+  "आज पिकांवर फवारणी करणे सुरक्षित आहे का?",
+];
+
 export const AskChat: React.FC = () => {
   const { language, city } = useApp();
   const { weather } = useWeather();
@@ -51,13 +61,25 @@ export const AskChat: React.FC = () => {
   const [inputQuery, setInputQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
+  const [showEvidence, setShowEvidence] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceDetails | null>(null);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const cityName = language === "hi" ? city.nameHi : city.nameEn;
-  const stateName = language === "hi" ? city.stateHi : city.stateEn;
+  const cityName =
+    language === "hi"
+      ? city.nameHi
+      : language === "mr" && city.nameMr
+      ? city.nameMr
+      : city.nameEn;
+  const stateName =
+    language === "hi"
+      ? city.stateHi
+      : language === "mr" && city.stateMr
+      ? city.stateMr
+      : city.stateEn;
 
-  // Speech Recognition (STT - en-IN / hi-IN)
+  // Speech Recognition (STT - en-IN / hi-IN / mr-IN)
   const {
     isSupported: isSpeechSupported,
     isListening,
@@ -76,7 +98,7 @@ export const AskChat: React.FC = () => {
     },
   });
 
-  // Speech Synthesis (TTS - en-IN / hi-IN)
+  // Speech Synthesis (TTS - en-IN / hi-IN / mr-IN)
   const {
     isSupported: isSynthSupported,
     currentlySpeakingId,
@@ -102,6 +124,8 @@ export const AskChat: React.FC = () => {
         content:
           language === "hi"
             ? `नमस्ते! मैं गगनदृष्टि एआई मौसम सहायक हूँ। मैं ${cityName} के लाइव मौसम, तापमान, वर्षा एवं खेती संबंधी मौसम निर्णय में आपकी सहायता के लिए तैयार हूँ। आप मुझसे क्या पूछना चाहते हैं?`
+            : language === "mr"
+            ? `नमस्कार! मी गगनदृष्टी एआय हवामान सहाय्यक आहे. मी ${cityName} मधील थेट हवामान, तापमान, पाऊस आणि शेतीविषयक निर्णयात मदत करण्यासाठी तयार आहे. मी तुम्हाला कशी मदत करू शकतो?`
             : `Hello! I am GaganDrishti AI, your bilingual weather intelligence assistant for ${cityName}. I can help you with real-time conditions, precipitation, temperature, and agrometeorological suitability. How can I help you today?`,
         timestamp: new Date().toLocaleTimeString("en-IN", {
           hour: "2-digit",
@@ -113,9 +137,12 @@ export const AskChat: React.FC = () => {
     }
   }, [language, cityName]);
 
-  // Auto scroll to bottom
+  // Internal container auto-scroll (does not scroll window/document)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
   }, [messages, isLoading]);
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -139,17 +166,31 @@ export const AskChat: React.FC = () => {
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
+    const historyPayload = messages.slice(-6).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const controller = new AbortController();
+    const watchdogTimeout = setTimeout(() => {
+      controller.abort();
+    }, 7500);
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           message: query,
           language,
           city,
           weather,
+          history: historyPayload,
         }),
       });
+
+      clearTimeout(watchdogTimeout);
 
       if (!response.ok) {
         throw new Error(`Server responded with ${response.status}`);
@@ -167,15 +208,45 @@ export const AskChat: React.FC = () => {
           hour12: true,
         }),
         isFallback: data.isFallback,
+        evidence: data.evidence,
       };
 
       setMessages((prev) => [...prev, botMsg]);
-    } catch {
-      setErrorNotice(
-        language === "hi"
-          ? "सर्वर से संवाद स्थापित नहीं हो सका। कृपया पुनः प्रयास करें।"
-          : "Unable to connect to the assistant server. Please try again."
-      );
+    } catch (err: unknown) {
+      clearTimeout(watchdogTimeout);
+      const isAbort = (err as Error)?.name === "AbortError";
+
+      // Always resolve to a final assistant message so conversation never stalls
+      const fallbackReply =
+        weather && weather.current
+          ? language === "hi"
+            ? `${cityName} में वर्तमान तापमान ${weather.current.temperature}°C (अनुभूत ${weather.current.apparentTemperature}°C) है। हवा ${weather.current.windSpeed} km/h और वर्षा की संभावना ${weather.daily[0]?.precipitationProbabilityMax ?? 0}% है।`
+            : `Current weather in ${cityName}: Temperature is ${weather.current.temperature}°C (feels like ${weather.current.apparentTemperature}°C) with ${weather.current.windSpeed} km/h winds and ${weather.daily[0]?.precipitationProbabilityMax ?? 0}% rain probability.`
+          : language === "hi"
+          ? `${cityName} के लिए मौसम डेटा अभी संकलित किया जा रहा है। कृपया कुछ क्षणों बाद पुनः पूछें।`
+          : `Weather data is currently compiling for ${cityName}. Please try asking again in a few moments.`;
+
+      const botMsg: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: fallbackReply,
+        timestamp: new Date().toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
+        isFallback: true,
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+
+      if (isAbort) {
+        setErrorNotice(
+          language === "hi"
+            ? "प्रतिक्रिया समय सीमा समाप्त। सत्यापित बैकअप डेटा प्रदर्शित किया गया है।"
+            : "Request timed out; verified backup weather telemetry provided."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -188,6 +259,8 @@ export const AskChat: React.FC = () => {
       content:
         language === "hi"
           ? `संवाद साफ़ कर दिया गया। ${cityName} के मौसम के बारे में कोई भी प्रश्न पूछें।`
+          : language === "mr"
+          ? `संभाषण साफ केले गेले. ${cityName} च्या हवामानाबद्दल कोणताही प्रश्न विचारा.`
           : `Conversation cleared. Ask any weather or farming question for ${cityName}.`,
       timestamp: new Date().toLocaleTimeString("en-IN", {
         hour: "2-digit",
@@ -199,36 +272,40 @@ export const AskChat: React.FC = () => {
   };
 
   const suggestedQuestions =
-    language === "hi" ? SUGGESTED_QUESTIONS_HI : SUGGESTED_QUESTIONS_EN;
+    language === "hi"
+      ? SUGGESTED_QUESTIONS_HI
+      : language === "mr"
+      ? SUGGESTED_QUESTIONS_MR
+      : SUGGESTED_QUESTIONS_EN;
 
   return (
-    <div className="flex flex-col h-[750px] max-h-[85vh] rounded-3xl border border-slate-700/60 bg-gradient-to-br from-[#0D1B2A]/95 via-[#07111F]/95 to-slate-950 shadow-2xl backdrop-blur-xl overflow-hidden">
+    <div className="flex flex-col h-[600px] max-h-[78vh] rounded-3xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-[#080E14] shadow-xs overflow-hidden transition-colors">
       {/* 1. Chat Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-900/60 p-4 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#060C12] p-3.5 sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20">
-            <Bot className="h-5 w-5" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600 text-white dark:bg-sky-500 dark:text-slate-950 font-bold shadow-xs">
+            <Bot className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-extrabold text-white">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#F8FAFC]">
                 {language === "hi" ? "गगनदृष्टि से पूछें" : "Ask GaganDrishti"}
               </h2>
-              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300">
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-800 dark:text-sky-300">
                 <Sparkles className="h-2.5 w-2.5" />
                 <span>AI Weather Assistant</span>
               </span>
             </div>
 
             {/* City & Telemetry Attached pill */}
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-              <MapPin className="h-3 w-3 text-cyan-400 shrink-0" />
-              <span className="font-semibold text-slate-300">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-[#7F91A3] mt-0.5">
+              <MapPin className="h-3 w-3 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
                 {cityName}, {stateName}
               </span>
-              <span className="text-slate-600">•</span>
-              <span className="font-mono text-[10px] text-emerald-400">
-                Live Open-Meteo Attached
+              <span className="text-slate-400">•</span>
+              <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
+                Open-Meteo Grounded
               </span>
             </div>
           </div>
@@ -238,7 +315,7 @@ export const AskChat: React.FC = () => {
         <button
           onClick={handleClearChat}
           type="button"
-          className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-xs text-slate-400 hover:text-rose-300 hover:border-rose-500/40 transition-all"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1219] px-2.5 py-1 text-xs text-slate-600 dark:text-[#7F91A3] hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-500/40 transition-all shadow-2xs"
           title="Clear Conversation"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -249,7 +326,10 @@ export const AskChat: React.FC = () => {
       </div>
 
       {/* 2. Messages Stream */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5"
+      >
         {messages.map((msg) => {
           const isUser = msg.role === "user";
 
@@ -261,16 +341,16 @@ export const AskChat: React.FC = () => {
               }`}
             >
               {!isUser && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 mt-1">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sky-50 dark:bg-[#0B1219] border border-sky-200 dark:border-sky-500/30 text-sky-600 dark:text-sky-400 mt-1">
                   <Bot className="h-4 w-4" />
                 </div>
               )}
 
               <div
-                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed shadow-md ${
+                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed shadow-xs ${
                   isUser
-                    ? "bg-gradient-to-br from-cyan-600 to-blue-600 text-white rounded-tr-xs"
-                    : "bg-slate-900/80 border border-slate-800 text-slate-200 rounded-tl-xs"
+                    ? "bg-sky-600 text-white font-medium rounded-tr-xs shadow-2xs dark:bg-[#0A1C2E] dark:text-[#F8FAFC] dark:border dark:border-sky-500/30"
+                    : "bg-[#F8FAFC] dark:bg-[#0B1219] border border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-[#CBD5E1] rounded-tl-xs"
                 }`}
               >
                 <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -278,7 +358,7 @@ export const AskChat: React.FC = () => {
                 {/* Footer of message */}
                 <div
                   className={`mt-2 flex items-center justify-between gap-3 text-[10px] ${
-                    isUser ? "text-cyan-100/70" : "text-slate-500"
+                    isUser ? "text-sky-900/70 dark:text-sky-200/70" : "text-slate-500 dark:text-[#7F91A3]"
                   }`}
                 >
                   {/* Speaker Button on Assistant Replies */}
@@ -294,8 +374,8 @@ export const AskChat: React.FC = () => {
                       }}
                       className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[10px] font-medium transition-all ${
                         currentlySpeakingId === msg.id
-                          ? "border border-cyan-400/50 bg-cyan-500/20 text-cyan-300 shadow-sm shadow-cyan-500/30 animate-pulse"
-                          : "border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 hover:text-cyan-300"
+                          ? "border border-sky-400/50 bg-sky-500/20 text-sky-300 shadow-sm shadow-sky-500/30 animate-pulse"
+                          : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#060C12] text-slate-500 dark:text-[#7F91A3] hover:border-slate-400 dark:hover:border-slate-700 hover:text-sky-600 dark:hover:text-sky-300"
                       }`}
                       title={
                         currentlySpeakingId === msg.id
@@ -305,8 +385,8 @@ export const AskChat: React.FC = () => {
                     >
                       {currentlySpeakingId === msg.id ? (
                         <>
-                          <Square className="h-2.5 w-2.5 fill-current text-cyan-300" />
-                          <span className="font-semibold text-cyan-300">
+                          <Square className="h-2.5 w-2.5 fill-current text-sky-400" />
+                          <span className="font-semibold text-sky-400">
                             {language === "hi" ? "रोकें" : "Stop"}
                           </span>
                         </>
@@ -321,21 +401,61 @@ export const AskChat: React.FC = () => {
 
                   {/* Subtle Fallback Indicator */}
                   {!isUser && msg.isFallback && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-cyan-400/90 bg-cyan-950/40 px-2 py-0.5 rounded-md border border-cyan-500/20">
-                      <Info className="h-3 w-3" />
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
+                      <Info className="h-2.5 w-2.5" />
                       <span>
                         {language === "hi"
-                          ? "बेसिक मौसम सहायक (नियम-आधारित)"
-                          : "Basic Weather Assistant (Deterministic Fallback)"}
+                          ? "बेसिक सहायक (नियम-आधारित)"
+                          : "Basic Assistant (Fallback)"}
                       </span>
                     </span>
                   )}
 
                   {!isUser && !msg.isFallback && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400/90">
-                      <Sparkles className="h-3 w-3" />
-                      <span>Gemini Powered</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-sky-600 dark:text-sky-400">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      <span>{language === "hi" ? "एआई उत्तर" : "AI Response"}</span>
                     </span>
+                  )}
+
+                  {!isUser && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const ev = msg.evidence;
+                        const metricsList = ev?.keyMetrics
+                          ? Object.entries(ev.keyMetrics).map(
+                              ([k, v]) => `${k}: ${v}`
+                            )
+                          : [
+                              `Spatial Grounding: ${cityName}, ${stateName} (${city.lat.toFixed(2)}°N, ${city.lon.toFixed(2)}°E)`,
+                              `Execution Pathway: ${msg.isFallback ? "Deterministic Weather Answer Engine" : "Grounded Gemini Assistant"}`,
+                            ];
+
+                        setSelectedEvidence({
+                          title: `AI Reasoning & Weather Grounding (${cityName})`,
+                          sourceName: ev?.source || (msg.isFallback ? "Deterministic Weather Answer Engine" : "Google Gemini Flash + Open-Meteo Telemetry"),
+                          locationName: ev?.resolvedLocation || `${cityName}, ${stateName}`,
+                          coordinates: `${city.lat.toFixed(4)}°N, ${city.lon.toFixed(4)}°E`,
+                          fetchedAt: ev?.timestamp || (weather ? new Date(weather.fetchedAt).toISOString() : new Date().toISOString()),
+                          rulesTriggered: [
+                            `Intent: ${ev?.intent || "weather_query"}`,
+                            `Target Window: ${ev?.targetWindow || "Current / Forecast"}`,
+                            `Weather Variable: ${ev?.weatherVariable || "General Forecast"}`,
+                            ...metricsList,
+                          ],
+                          thresholds: [
+                            "Integrity rule: strictly real coordinates and verified Open-Meteo telemetry",
+                          ],
+                          modelsUsed: [msg.isFallback ? "Deterministic Weather Engine" : "Google Gemini Flash", "Open-Meteo Ingest"],
+                        });
+                        setShowEvidence(true);
+                      }}
+                      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 hover:text-sky-600 dark:text-[#7F91A3] dark:hover:text-cyan-400 hover:bg-slate-100 dark:hover:bg-[#0B1219] transition-colors cursor-pointer"
+                    >
+                      <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                      <span>{language === "hi" ? "तर्क व प्रमाण" : language === "mr" ? "तर्क व पुरावा" : "Why this answer?"}</span>
+                    </button>
                   )}
 
                   <span className="font-mono ml-auto">{msg.timestamp}</span>
@@ -343,7 +463,7 @@ export const AskChat: React.FC = () => {
               </div>
 
               {isUser && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-300 mt-1">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[#0B1219] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 mt-1">
                   <User className="h-4 w-4" />
                 </div>
               )}
@@ -352,37 +472,49 @@ export const AskChat: React.FC = () => {
         })}
 
         {/* Loading Bubble */}
-        {isLoading && (
-          <div className="flex gap-3 justify-start items-center">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
-              <Bot className="h-4 w-4" />
+        {isLoading && (() => {
+          const lastUserMsg = messages.slice().reverse().find(m => m.role === "user")?.content.toLowerCase() || "";
+          const isTravel = lastUserMsg.includes("jana") || lastUserMsg.includes("se ") || lastUserMsg.includes("travel") || lastUserMsg.includes("route") || lastUserMsg.includes("bike") || lastUserMsg.includes("car");
+          const isFarmer = lastUserMsg.includes("spray") || lastUserMsg.includes("छिड़काव") || lastUserMsg.includes("chhidkav") || lastUserMsg.includes("dawa") || lastUserMsg.includes("सिंचाई") || lastUserMsg.includes("sinchai") || lastUserMsg.includes("irrigation") || lastUserMsg.includes("फसल") || lastUserMsg.includes("crop");
+          const isFlood = lastUserMsg.includes("badh") || lastUserMsg.includes("बाढ़") || lastUserMsg.includes("flood") || lastUserMsg.includes("जलभराव") || lastUserMsg.includes("waterlog") || lastUserMsg.includes("4-5 din") || lastUserMsg.includes("char panch");
+          const isRainTiming = (lastUserMsg.includes("barish") || lastUserMsg.includes("rain") || lastUserMsg.includes("baarish")) && (lastUserMsg.includes("kab") || lastUserMsg.includes("time") || lastUserMsg.includes("samay") || lastUserMsg.includes("baje") || lastUserMsg.includes("when"));
+
+          const loadingText = isTravel
+            ? (language === "hi" ? "यात्रा मार्ग एवं दोनों शहरों का मौसम विश्लेषित किया जा रहा है..." : "Analyzing route weather and commute suitability...")
+            : isFarmer
+            ? (language === "hi" ? "फसल स्प्रे विंडो एवं मौसम साक्ष्यों की पुष्टि की जा रही है..." : "Checking crop spray window and wind telemetry...")
+            : isFlood
+            ? (language === "hi" ? "आगामी 5 दिनों के वर्षा मॉडल एवं जलभराव जोखिम का आकलन जारी है..." : "Evaluating 5-day precipitation telemetry and waterlogging risk...")
+            : isRainTiming
+            ? (language === "hi" ? "प्रति घंटा वर्षा समय एवं संभावना का विश्लेषण जारी है..." : "Checking hourly rain timing and precipitation models...")
+            : (language === "hi" ? `${cityName} के मौसम का विश्लेषण किया जा रहा है...` : `Analyzing weather intelligence for ${cityName}...`);
+
+          return (
+            <div className="flex gap-3 justify-start items-center">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sky-50 dark:bg-[#0B1219] border border-sky-500/30 text-sky-500">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="rounded-2xl bg-slate-100 dark:bg-[#0B1219] border border-slate-200 dark:border-slate-800 p-3.5 text-xs text-slate-600 dark:text-[#7F91A3] flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
+                <span>{loadingText}</span>
+              </div>
             </div>
-            <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 text-xs text-slate-400 flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
-              <span>
-                {language === "hi"
-                  ? `${cityName} के मौसम का विश्लेषण किया जा रहा है...`
-                  : `Analyzing weather intelligence for ${cityName}...`}
-              </span>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Error Notice */}
         {errorNotice && (
-          <div className="rounded-2xl border border-rose-500/40 bg-rose-950/20 p-3 text-xs text-rose-300 flex items-center gap-2">
+          <div className="rounded-2xl border border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 p-3 text-xs text-rose-600 dark:text-rose-300 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorNotice}</span>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* 3. Suggested Question Chips */}
-      <div className="px-4 py-2 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">
+      <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800/80 bg-[#F8FAFC] dark:bg-[#060C12]">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
             {language === "hi" ? "सुझाव:" : "Suggestions:"}
           </span>
           {suggestedQuestions.map((sug, i) => (
@@ -390,7 +522,7 @@ export const AskChat: React.FC = () => {
               key={i}
               onClick={() => handleSendMessage(sug)}
               type="button"
-              className="rounded-full border border-slate-800 bg-slate-900/80 hover:border-cyan-500/50 hover:bg-slate-800 px-3 py-1 text-xs text-slate-300 whitespace-nowrap transition-all shadow-xs"
+              className="rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1219] hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-[#0E1821] px-2.5 py-0.5 text-[11px] text-slate-700 dark:text-slate-300 whitespace-nowrap transition-all shadow-2xs"
             >
               {sug}
             </button>
@@ -399,10 +531,10 @@ export const AskChat: React.FC = () => {
       </div>
 
       {/* 4. Chat Input Bar */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 space-y-3">
+      <div className="p-3.5 sm:p-4 border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 space-y-3">
         {/* Active Speech Recognition Banner */}
         {isListening && (
-          <div className="flex items-center gap-2 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-3.5 py-2.5 text-xs text-rose-300 shadow-lg shadow-rose-950/40 animate-pulse">
+          <div className="flex items-center gap-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 dark:bg-rose-950/40 px-3.5 py-2 text-xs text-rose-700 dark:text-rose-300 shadow-sm animate-pulse">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
@@ -410,13 +542,13 @@ export const AskChat: React.FC = () => {
             <span className="font-semibold shrink-0">
               {language === "hi" ? "सुन रहे हैं (hi-IN):" : "Listening (en-IN):"}
             </span>
-            <span className="italic text-slate-200 truncate">
+            <span className="italic text-slate-700 dark:text-slate-200 truncate">
               {interimTranscript || (language === "hi" ? "कृपया बोलें..." : "Speak now...")}
             </span>
             <button
               type="button"
               onClick={stopListening}
-              className="ml-auto rounded-lg bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[11px] font-bold text-rose-200 hover:bg-rose-500/40 transition-colors shrink-0"
+              className="ml-auto rounded-lg bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[11px] font-bold text-rose-700 dark:text-rose-200 hover:bg-rose-500/30 transition-colors shrink-0"
             >
               {language === "hi" ? "पूर्ण करें" : "Done"}
             </button>
@@ -425,15 +557,15 @@ export const AskChat: React.FC = () => {
 
         {/* Speech Error Banner */}
         {speechError && (
-          <div className="flex items-center justify-between gap-2 rounded-2xl border border-amber-500/40 bg-amber-950/30 px-3.5 py-2 text-xs text-amber-300">
+          <div className="flex items-center justify-between gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/10 dark:bg-amber-950/30 px-3.5 py-2 text-xs text-amber-800 dark:text-amber-300">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+              <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
               <span>{speechError}</span>
             </div>
             <button
               type="button"
               onClick={clearSpeechError}
-              className="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded-md hover:bg-slate-800 transition-colors"
+              className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-xs px-2 py-0.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
               title="Dismiss error"
             >
               ✕
@@ -462,7 +594,7 @@ export const AskChat: React.FC = () => {
                 : `Ask about weather, rain, or farming in ${cityName}...`
             }
             disabled={isLoading}
-            className="flex-1 rounded-2xl border border-slate-700/80 bg-slate-950 px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-hidden focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 disabled:opacity-50"
+            className="flex-1 rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-[#F8FAFC] dark:bg-[#060C12] px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 dark:placeholder-[#7F91A3] focus:outline-hidden focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 disabled:opacity-50 shadow-2xs"
           />
 
           {/* Microphone (Speech-to-Text) Button */}
@@ -470,12 +602,12 @@ export const AskChat: React.FC = () => {
             type="button"
             onClick={handleMicToggle}
             disabled={!isSpeechSupported || isLoading}
-            className={`relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border transition-all shrink-0 ${
+            className={`relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border transition-all shrink-0 shadow-2xs ${
               isListening
-                ? "border-rose-500 bg-rose-500/20 text-rose-300 shadow-lg shadow-rose-500/30 animate-pulse"
+                ? "border-rose-500 bg-rose-500/20 text-rose-600 dark:text-rose-300 shadow-lg shadow-rose-500/30 animate-pulse"
                 : !isSpeechSupported
-                ? "border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed"
-                : "border-slate-700/80 bg-slate-900/80 text-cyan-400 hover:border-cyan-500 hover:bg-slate-800"
+                ? "border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#060C12] text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                : "border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0B1219] text-sky-600 dark:text-sky-400 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-[#0E1821]"
             }`}
             title={
               !isSpeechSupported
@@ -493,10 +625,10 @@ export const AskChat: React.FC = () => {
           >
             {isListening ? (
               <>
-                <Mic className="h-5 w-5 text-rose-400 animate-bounce" />
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <Mic className="h-5 w-5 text-rose-500 animate-bounce" />
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
                 </span>
               </>
             ) : !isSpeechSupported ? (
@@ -510,7 +642,7 @@ export const AskChat: React.FC = () => {
           <button
             type="submit"
             disabled={!inputQuery.trim() || isLoading}
-            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold hover:from-cyan-400 hover:to-blue-500 disabled:opacity-40 transition-all shadow-lg shadow-cyan-500/20 shrink-0"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold disabled:opacity-40 transition-all shadow-2xs shrink-0 dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950"
             title="Send Message"
           >
             {isLoading ? (
@@ -523,9 +655,9 @@ export const AskChat: React.FC = () => {
       </div>
 
       {/* 5. Device Support Notice */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 bg-slate-950/70 px-4 py-2 text-[10px] text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 dark:border-slate-800/60 bg-slate-50 dark:bg-[#060C12] px-4 py-2 text-[10px] text-slate-500 dark:text-[#7F91A3]">
         <div className="flex items-center gap-1.5">
-          <Radio className="h-3 w-3 text-cyan-400 shrink-0" />
+          <Radio className="h-3 w-3 text-sky-500 dark:text-cyan-400 shrink-0" />
           <span>
             {language === "hi"
               ? "वॉइस पहचान (hi-IN) एवं वाक् आउटपुट ब्राउज़र/डिवाइस समर्थन (Chrome, Edge, Safari) पर निर्भर करता है।"
@@ -564,6 +696,12 @@ export const AskChat: React.FC = () => {
           </span>
         </div>
       </div>
+
+      <EvidenceProvenanceDrawer
+        isOpen={showEvidence}
+        onClose={() => setShowEvidence(false)}
+        evidence={selectedEvidence}
+      />
     </div>
   );
 };

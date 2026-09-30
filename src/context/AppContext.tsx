@@ -45,16 +45,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   // Initialize from localStorage safely after mount to avoid SSR hydration mismatch
   useEffect(() => {
     try {
-      const storedCityId = localStorage.getItem(STORAGE_KEYS.CITY);
-      if (storedCityId) {
-        const found = CITIES.find((c) => c.id === storedCityId);
-        if (found) {
-          setCityState(found);
+      const storedCity = localStorage.getItem(STORAGE_KEYS.CITY);
+      if (storedCity) {
+        try {
+          if (storedCity.startsWith("{")) {
+            const parsedCity: City = JSON.parse(storedCity);
+            if (parsedCity && parsedCity.lat && parsedCity.lon) {
+              setCityState(parsedCity);
+            }
+          } else {
+            const found = CITIES.find((c) => c.id === storedCity);
+            if (found) {
+              setCityState(found);
+            }
+          }
+        } catch {
+          // Ignore parse errors
         }
       }
 
       const storedLang = localStorage.getItem(STORAGE_KEYS.LANG) as Language | null;
-      if (storedLang === "en" || storedLang === "hi") {
+      if (storedLang === "en" || storedLang === "hi" || storedLang === "mr") {
         setLanguageState(storedLang);
       }
 
@@ -80,7 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const setCity = useCallback((newCity: City) => {
     setCityState(newCity);
     try {
-      localStorage.setItem(STORAGE_KEYS.CITY, newCity.id);
+      localStorage.setItem(STORAGE_KEYS.CITY, JSON.stringify(newCity));
     } catch {
       // Ignore storage errors
     }

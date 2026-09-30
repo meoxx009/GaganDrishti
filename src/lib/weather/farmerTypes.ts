@@ -1,4 +1,11 @@
-export type CropId = "wheat" | "paddy" | "soybean" | "maize" | "mustard";
+export type CropId =
+  | "wheat"
+  | "paddy"
+  | "soybean"
+  | "maize"
+  | "mustard"
+  | string;
+
 
 export type StageId = "sowing" | "growing" | "flowering" | "harvesting";
 

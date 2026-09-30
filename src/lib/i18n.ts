@@ -4,7 +4,7 @@ export interface TranslationDictionary {
   brand: {
     title: string;
     sub: string;
-    badge: string;
+    badge?: string;
     tagline: string;
   };
   header: {
@@ -85,11 +85,31 @@ export interface TranslationDictionary {
       card3Title: string;
       card3Desc: string;
     };
+    climateHighlights: {
+      heading: string;
+      card1Title: string;
+      card1Desc: string;
+      card2Title: string;
+      card2Desc: string;
+      card3Title: string;
+      card3Desc: string;
+    };
+    resourcesHighlights: {
+      heading: string;
+      card1Title: string;
+      card1Desc: string;
+      card2Title: string;
+      card2Desc: string;
+      card3Title: string;
+      card3Desc: string;
+    };
   };
   footer: {
-    sihNote: string;
-    techStack: string;
+    productLine: string;
+    disclaimer: string;
     copyright: string;
+    sihNote?: string;
+    techStack?: string;
   };
 }
 
@@ -97,8 +117,8 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
   en: {
     brand: {
       title: "GaganDrishti",
-      sub: "गगनदृष्टि",
-      badge: "SIH 2026 Prototype",
+      sub: "AI Weather Intelligence",
+      badge: "AI Weather Intelligence",
       tagline: "Bilingual Weather Intelligence for Citizens & Farmers",
     },
     header: {
@@ -129,6 +149,11 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         sub: "मौसम चेतावनी",
         desc: "Severe weather early warnings, IMD radar watch, and high-wind / thunderstorm alerts.",
       },
+      climate: {
+        label: "Climate Analytics",
+        sub: "जलवायु विश्लेषण",
+        desc: "Historical reanalysis trends, seasonal anomalies, and multi-year precipitation patterns.",
+      },
       ask: {
         label: "Ask GaganDrishti",
         sub: "गगनदृष्टि से पूछें",
@@ -138,6 +163,11 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         label: "Emergency",
         sub: "आपातकालीन सेवा",
         desc: "SOS protocols, disaster management helplines, and civil defense contingency plans.",
+      },
+      resources: {
+        label: "Resources & Transparency",
+        sub: "डेटा स्रोत व खुलापन",
+        desc: "Upstream meteorological telemetry providers, calculation methodology, and architecture compliance.",
       },
     },
     section: {
@@ -160,8 +190,8 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card1Desc: "Targeted localized forecasts for daily commuting, outdoor activity, and schools.",
         card2Title: "Heatwave & UV Index",
         card2Desc: "Real-time thermal stress index with hydration and sun exposure recommendations.",
-        card3Title: "Air Quality & Smog",
-        card3Desc: "Bilingual respiratory advisories for children, seniors, and active commuters.",
+        card3Title: "Air Quality & Commute Health",
+        card3Desc: "Truthful respiratory guidance based on atmospheric conditions without fabricated sensor data.",
       },
       farmerHighlights: {
         heading: "Agricultural Meteorological Intelligence",
@@ -181,6 +211,15 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card3Title: "Cyclone & Gale Advisories",
         card3Desc: "Coastal and inland wind speed thresholds with infrastructure cautions.",
       },
+      climateHighlights: {
+        heading: "Historical Climate & ERA5 Reanalysis",
+        card1Title: "10-Year Temperature Trajectory",
+        card1Desc: "Long-term thermal trends, summer peak shifts, and winter minimum patterns.",
+        card2Title: "Precipitation Climatology",
+        card2Desc: "Annual rainfall accumulation totals against multi-decade baseline averages.",
+        card3Title: "Climatological Anomalies",
+        card3Desc: "Mathematical departures from 30-year reanalysis normals without speculative claims.",
+      },
       askHighlights: {
         heading: "Conversational Meteorological Assistant",
         card1Title: "Bilingual Natural Queries",
@@ -199,18 +238,29 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card3Title: "Power & Infrastructure Outage Status",
         card3Desc: "Monitored utility reliability notices during severe atmospheric events.",
       },
+      resourcesHighlights: {
+        heading: "Data Provenance & Open API Registry",
+        card1Title: "Upstream Data Providers",
+        card1Desc: "Open-Meteo, IMD Geoserver WFS, ECMWF IFS, and Copernicus ERA5 provenance details.",
+        card2Title: "Mathematical Formulas",
+        card2Desc: "Transparent deterministic rules for spray windows, irrigation, and thermal comfort.",
+        card3Title: "SIH 2026 Prototype Integrity",
+        card3Desc: "Strict zero-fake-data policy and clear separation of official alerts from predictive models.",
+      },
     },
     footer: {
-      sihNote: "Smart India Hackathon (SIH) 2026 Prototype — Ministry & Jury Demonstration Shell",
-      techStack: "Next.js App Router • TypeScript • Tailwind CSS • Lucide React",
-      copyright: "GaganDrishti Weather Intelligence Platform. All rights reserved.",
+      productLine: "GaganDrishti • Weather data: Open-Meteo • AI-assisted weather intelligence",
+      disclaimer: "Live weather data is informational. Verify official emergency warnings with IMD or competent authorities.",
+      copyright: "© 2026 GaganDrishti. All rights reserved.",
+      sihNote: "GaganDrishti • Weather data: Open-Meteo • AI-assisted weather intelligence",
+      techStack: "",
     },
   },
   hi: {
     brand: {
       title: "गगनदृष्टि",
-      sub: "GaganDrishti",
-      badge: "एस.आई.एच 2026 प्रोटोटाइप",
+      sub: "एआई मौसम आसूचना",
+      badge: "एआई मौसम आसूचना",
       tagline: "नागरिकों और किसानों के लिए द्विभाषी मौसम आसूचना प्रणाली",
     },
     header: {
@@ -241,6 +291,11 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         sub: "Weather Alerts",
         desc: "गंभीर मौसमी आपदाएं, भारी वर्षा, आंधी-तूफान एवं वज्रपात पूर्व चेतावनी।",
       },
+      climate: {
+        label: "जलवायु विश्लेषण",
+        sub: "Climate Analytics",
+        desc: "ऐतिहासिक पुनर्विश्लेषण (ERA5) रुझान, वर्षा विसंगति एवं बहुवर्षीय मौसमी पैटर्न।",
+      },
       ask: {
         label: "गगनदृष्टि से पूछें",
         sub: "Ask GaganDrishti",
@@ -250,6 +305,11 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         label: "आपातकालीन सेवा",
         sub: "Emergency",
         desc: "आपदा प्रबंधन हेल्पलाइन, नागरिक सुरक्षा उपाय एवं आपातकालीन संपर्क।",
+      },
+      resources: {
+        label: "डेटा स्रोत व पारदर्शिता",
+        sub: "Resources & Open Data",
+        desc: "मौसम संबंधी डेटा प्रदाता, गणितीय सूत्र एवं शून्य-लागत आर्किटेक्चर खुलापन।",
       },
     },
     section: {
@@ -272,8 +332,8 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card1Desc: "दैनिक यात्रा, स्कूली बच्चों और बाहरी गतिविधियों हेतु सटीक पूर्वानुमान।",
         card2Title: "लू एवं यूवी सूचकांक परामर्श",
         card2Desc: "गर्मी के तनाव से बचाव, जल सेवन एवं धूप से सुरक्षा के वास्तविक उपाय।",
-        card3Title: "वायु गुणवत्ता एवं स्मॉग सूचकांक",
-        card3Desc: "वरिष्ठ नागरिकों और बच्चों के स्वास्थ्य के लिए स्पष्ट द्विभाषी स्वास्थ्य सलाह।",
+        card3Title: "वायु स्थिति व श्वसन परामर्श",
+        card3Desc: "मौसम व दृश्यता स्थिति के आधार पर पारदर्शी स्वास्थ्य सलाह (कोई नकली सेंसर डेटा नहीं)।",
       },
       farmerHighlights: {
         heading: "कृषि-मौसम आसूचना क्षमताएं",
@@ -293,6 +353,15 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card3Title: "चक्रवात एवं तेज आंधी चेतावनी",
         card3Desc: "तटीय व मैदानी क्षेत्रों में वायु वेग सीमा व सुरक्षित आश्रय निर्देश।",
       },
+      climateHighlights: {
+        heading: "ऐतिहासिक जलवायु एवं ERA5 पुनर्विश्लेषण",
+        card1Title: "10-वर्षीय तापमान प्रक्षेपवक्र",
+        card1Desc: "दीर्घकालिक थर्मल रुझान, ग्रीष्मकालीन चरम और शीतकालीन न्यूनतम तापमान।",
+        card2Title: "वर्षा जलवायु विज्ञान",
+        card2Desc: "बहु-दशक आधारभूत औसत के विरुद्ध वार्षिक वर्षा संचयन कुल।",
+        card3Title: "जलवायु विसंगतियां (Anomalies)",
+        card3Desc: "बिना किसी अटकल के 30-वर्षीय सामान्य से गणितीय विचलन।",
+      },
       askHighlights: {
         heading: "संवादात्मक मौसम सहायक",
         card1Title: "सरल भाषा में प्रश्न पूछें",
@@ -311,11 +380,164 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
         card3Title: "विद्युत व आवश्यक सेवाएं स्थिति",
         card3Desc: "गंभीर मौसम के दौरान बुनियादी ढांचे और संचार सेवा स्थिति।",
       },
+      resourcesHighlights: {
+        heading: "डेटा स्रोत व खुला एपीआई पंजीयन",
+        card1Title: "खुले मौसम डेटा प्रदाता",
+        card1Desc: "Open-Meteo, IMD जियोसर्वर WFS, ECMWF IFS एवं Copernicus ERA5 डेटा का विस्तृत विवरण।",
+        card2Title: "गणितीय सूत्र व नियम",
+        card2Desc: "स्प्रे विंडो, सिंचाई सलाह और तापीय तनाव सूचकांक के पारदर्शी गणितीय नियम।",
+        card3Title: "प्रोटोटाइप सत्यनिष्ठा",
+        card3Desc: "शून्य फर्जी डेटा नीति और सरकारी चेतावनियों का पूर्वानुमानात्मक मॉडल से स्पष्ट अलगाव।",
+      },
     },
     footer: {
-      sihNote: "स्मार्ट इंडिया हैकाथॉन (SIH) 2026 प्रोटोटाइप — मंत्रालय एवं जूरी प्रदर्शन शेल",
-      techStack: "Next.js ऐप रूटर • टाइपस्क्रिप्ट • टेलविंड सीएसएस • ल्यूसिड रिएक्ट",
-      copyright: "गगनदृष्टि मौसम आसूचना मंच। सर्वाधिकार सुरक्षित।",
+      productLine: "गगनदृष्टि • मौसम डेटा: Open-Meteo • एआई-सहायता प्राप्त मौसम आसूचना",
+      disclaimer: "लाइव मौसम जानकारी केवल सूचनात्मक है। आधिकारिक आपातकालीन चेतावनियों के लिए IMD या संबंधित प्राधिकरण से पुष्टि करें।",
+      copyright: "© 2026 गगनदृष्टि। सर्वाधिकार सुरक्षित।",
+      sihNote: "गगनदृष्टि • मौसम डेटा: Open-Meteo • एआई-सहायता प्राप्त मौसम आसूचना",
+      techStack: "",
+    },
+  },
+  mr: {
+    brand: {
+      title: "गगनदृष्टी",
+      sub: "एआय हवामान बुद्धिमत्ता",
+      badge: "एआय हवामान बुद्धिमत्ता",
+      tagline: "नागरिक आणि शेतकऱ्यांसाठी हवामान बुद्धिमत्ता प्रणाली",
+    },
+    header: {
+      liveFeeds: "थेट प्रवाह",
+      systemActive: "सक्रिय प्रणाली",
+      istClock: "भा.प्र.वे (IST)",
+      selectCity: "शहर निवडा",
+      coordinates: "निर्देशांक",
+      toggleTheme: "थीम बदला",
+      toggleLanguage: "भाषा बदला",
+      lightMode: "लाइट",
+      darkMode: "डार्क",
+      searchCity: "स्थान शोधा किंवा निवडा...",
+    },
+    navigation: {
+      citizen: {
+        label: "नागरिक",
+        sub: "Citizen",
+        desc: "स्थानिक हवामान अंदाज, हवेची गुणवत्ता आणि दैनंदिन नियोजन.",
+      },
+      farmer: {
+        label: "शेतकरी",
+        sub: "Farmer",
+        desc: "कृषी-हवामान सल्ला, पीक संरक्षण दिनदर्शिका आणि सिंचन जोखीम इशारा.",
+      },
+      alerts: {
+        label: "हवामान इशारे",
+        sub: "Weather Alerts",
+        desc: "तीव्र हवामान आपत्ती, मुसळधार पाऊस, वादळ आणि वीज पडण्याचा इशारा.",
+      },
+      climate: {
+        label: "हवामान विश्लेषण",
+        sub: "Climate Analytics",
+        desc: "दीर्घकालीन ऐतिहासिक हवामान कल, पाऊस आणि तापमानातील बदल.",
+      },
+      ask: {
+        label: "गगनदृष्टीला विचारा",
+        sub: "Ask GaganDrishti",
+        desc: "नैसर्गिक भाषा हवामान सहाय्यक - हवामान आणि शेतीविषयक प्रश्नांची उत्तरे.",
+      },
+      emergency: {
+        label: "आपत्कालीन सेवा",
+        sub: "Emergency",
+        desc: "आपत्ती व्यवस्थापन हेल्पलाईन, नागरी संरक्षण उपाय आणि आपत्कालीन संपर्क.",
+      },
+      resources: {
+        label: "डेटा स्रोत व पारदर्शकता",
+        sub: "Resources & Open Data",
+        desc: "हवामान डेटा प्रदाते, गणितीय सूत्रे आणि शून्य-खर्च रचना पारदर्शकता.",
+      },
+    },
+    section: {
+      activeLocation: "सक्रिय स्थान",
+      coordinatesLabel: "निश्चित जीपीएस निर्देशांक",
+      statusBadge: "थेट डेटा फीड जोडणी सज्ज",
+      moduleStatusTitle: "मॉड्यूल स्थिती",
+      architectureTitle: "रचना आणि डेटा अनुपालन",
+      sectionKey: "मॉड्यूल की",
+      languageMode: "सक्रिय भाषा",
+      streamState: "डेटा प्रवाह स्थिती",
+      streamStateValue: "थेट हवामान सेवेशी संपर्क प्रतीक्षेत",
+      authAndDb: "रचना",
+      authAndDbValue: "ग्लोबल रिअ‍ॅक्ट संदर्भ आणि स्थानिक साठवण",
+      readinessDescription:
+        "एस.आय.एच 2026 मानकांनुसार पूर्ण अनुपालन. कोणतेही बनावट हवामान आकडे नाहीत. सर्व निरीक्षण स्थाने अचूक जीपीएस निर्देशांकांसह भारतीय हवामान विभाग (IMD) आणि ओपन डेटा पाइपलाइनसाठी सज्ज आहेत.",
+      citizenHighlights: {
+        heading: "नागरिक हवामान सुविधा",
+        card1Title: "तासनिहाय स्थानिक अंदाज",
+        card1Desc: "दैनंदिन प्रवास, शाळा आणि बाहेरील कामांसाठी अचूक अंदाज.",
+        card2Title: "उष्णतेची लाट व यूव्ही निर्देशांक",
+        card2Desc: "उष्णतेचा ताण, पाणी पिणे आणि उन्हापासून संरक्षणाचे उपाय.",
+        card3Title: "हवेची गुणवत्ता व आरोग्य",
+        card3Desc: "हवामानावर आधारित पारदर्शक आरोग्य सल्ला (कोणताही बनावट सेन्सर डेटा नाही).",
+      },
+      farmerHighlights: {
+        heading: "कृषी-हवामान बुद्धिमत्ता",
+        card1Title: "पेरणी व काढणी सल्ला",
+        card1Desc: "पाऊस आणि जमिनीतील ओलाव्यानुसार पिकांसाठी टप्प्याटप्प्याने मार्गदर्शन.",
+        card2Title: "जमिनीतील ओलावा व बाष्पीभवन",
+        card2Desc: "पाणी साचणे आणि दुष्काळापासून संरक्षणासाठी अचूक सिंचन वेळापत्रक.",
+        card3Title: "गारपीट व थंडीचा इशारा",
+        card3Desc: "पीक नुकसान टाळण्यासाठी नैसर्गिक आपत्तीपूर्वी त्वरित इशारा.",
+      },
+      alertsHighlights: {
+        heading: "आपत्ती पूर्व इशारा देखरेख",
+        card1Title: "वादळ व वीज रडार",
+        card1Desc: "रंग-आधारित इशारा स्तर: पिवळा (निरीक्षण), नारंगी (सतर्कता), लाल (धोका).",
+        card2Title: "अचानक पूर व ढगफुटी",
+        card2Desc: "पाणी निचरा जोखीम आणि सखल भागांसाठी पूर इशारा.",
+        card3Title: "चक्रीवादळ व जोरदार वारे",
+        card3Desc: "किनारपट्टी व मैदानी भागांत वाऱ्याचा वेग आणि सुरक्षित आश्रय सूचना.",
+      },
+      climateHighlights: {
+        heading: "ऐतिहासिक हवामान विश्लेषण (ERA5)",
+        card1Title: "१० वर्षांचा तापमान कल",
+        card1Desc: "दीर्घकालीन कमाल आणि किमान तापमानातील बदल.",
+        card2Title: "वार्षिक पाऊस सरासरी",
+        card2Desc: "ऐतिहासिक पावसाचे वितरण आणि दुष्काळ/अतिवृष्टी कल.",
+        card3Title: "हवामान विसंगती (Anomaly)",
+        card3Desc: "ऐतिहासिक सरासरीच्या तुलनेत चालू वर्षातील फरक.",
+      },
+      askHighlights: {
+        heading: "संभाषण हवामान सहाय्यक",
+        card1Title: "सोप्या भाषेत प्रश्न विचारा",
+        card1Desc: "हवामान आणि शेतीविषयक कोणताही प्रश्न मराठी, हिंदी किंवा इंग्रजीत विचारा.",
+        card2Title: "निवडलेल्या शहराशी सुसंगत उत्तर",
+        card2Desc: "सर्व उत्तरे तुमच्या सध्या निवडलेल्या स्थानाच्या हवामानाशी जुळतील.",
+        card3Title: "कृतीयोग्य सल्ला",
+        card3Desc: "सिंचन करावे की नाही, प्रवास सुरक्षित आहे की नाही - स्पष्ट सल्ला.",
+      },
+      emergencyHighlights: {
+        heading: "नागरी संरक्षण व आपत्ती निवारण",
+        card1Title: "जिल्हा आपत्ती व्यवस्थापन प्राधिकरण (DDMA)",
+        card1Desc: "थेट हेल्पलाईन नंबर, मदत छावण्यांची यादी आणि नियंत्रण कक्ष.",
+        card2Title: "पूर व दरड कोसळणे सुरक्षा नियम",
+        card2Desc: "राष्ट्रीय आपत्ती व्यवस्थापन प्राधिकरणाचे (NDMA) प्रमाणित सुरक्षा नियम.",
+        card3Title: "वीज व आवश्यक सेवा स्थिती",
+        card3Desc: "तीव्र हवामानात पायाभूत सुविधा आणि दळणवळण सेवा स्थिती.",
+      },
+      resourcesHighlights: {
+        heading: "डेटा स्रोत व मुक्त एपीआय नोंदणी",
+        card1Title: "मुक्त हवामान डेटा प्रदाते",
+        card1Desc: "Open-Meteo, IMD जिओसर्व्हर WFS, ECMWF IFS आणि Copernicus ERA5 डेटा तपशील.",
+        card2Title: "गणितीय सूत्रे व निकष",
+        card2Desc: "फवारणी वेळ, सिंचन सल्ला आणि उष्णता निर्देशांक यांच्या पारदर्शक गणितीय नियमावली.",
+        card3Title: "प्रोटोटाइप सत्यता",
+        card3Desc: "शून्य बनावट डेटा धोरण आणि सरकारी इशाऱ्यांचे अंदाज मॉडेल्सपासून स्पष्ट वर्गीकरण.",
+      },
+    },
+    footer: {
+      productLine: "गगनदृष्टी • हवामान डेटा: Open-Meteo • एआय-सहाय्यित हवामान बुद्धिमत्ता",
+      disclaimer: "थेट हवामान माहिती केवळ मार्गदर्शनासाठी आहे. अधिकृत आपत्कालीन इशाऱ्यांसाठी IMD किंवा सक्षम प्राधिकरणाशी संपर्क साधा.",
+      copyright: "© 2026 गगनदृष्टी. सर्व हक्क राखीव.",
+      sihNote: "गगनदृष्टी • हवामान डेटा: Open-Meteo • एआय-सहाय्यित हवामान बुद्धिमत्ता",
+      techStack: "",
     },
   },
 };

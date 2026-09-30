@@ -1,0 +1,46 @@
+[
+  {
+    "crop_name": "Soybean",
+    "pest_or_disease_name": "Girdle Beetle & Semilooper",
+    "type": "PEST",
+    "vulnerable_stage": "Vegetative to Flowering",
+    "min_temp": 24.0,
+    "max_temp": 32.0,
+    "min_humidity": 75.0,
+    "consecutive_rainy_days": 2,
+    "treatment": "Neem oil 1500 ppm @ 5ml/L or Chlorantraniliprole 18.5 SC @ 0.3ml/L"
+  },
+  {
+    "crop_name": "Soybean",
+    "pest_or_disease_name": "Yellow Mosaic Virus (Whitefly Vector)",
+    "type": "DISEASE",
+    "vulnerable_stage": "Early Vegetative",
+    "min_temp": 28.0,
+    "max_temp": 36.0,
+    "min_humidity": 60.0,
+    "consecutive_rainy_days": 0,
+    "treatment": "Install yellow sticky traps (15-20/acre) & spray Thiamethoxam 25 WG @ 0.5g/L"
+  },
+  {
+    "crop_name": "Wheat",
+    "pest_or_disease_name": "Yellow / Brown Rust",
+    "type": "DISEASE",
+    "vulnerable_stage": "Tillering to Heading",
+    "min_temp": 10.0,
+    "max_temp": 20.0,
+    "min_humidity": 85.0,
+    "consecutive_rainy_days": 3,
+    "treatment": "Propiconazole 25 EC @ 1ml/L at first appearance of pustules"
+  },
+  {
+    "crop_name": "Mustard",
+    "pest_or_disease_name": "Mustard Aphid (Lipaphis erysimi)",
+    "type": "PEST",
+    "vulnerable_stage": "Flowering & Pod Formation",
+    "min_temp": 12.0,
+    "max_temp": 22.0,
+    "min_humidity": 70.0,
+    "consecutive_rainy_days": 0,
+    "treatment": "Dimethoate 30 EC @ 1.5ml/L or Imidacloprid 17.8 SL @ 0.3ml/L"
+  }
+]

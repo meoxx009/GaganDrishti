@@ -7,6 +7,7 @@ import {
   CROPS,
   STAGES,
 } from "./farmerTypes";
+import { findCropById } from "../crops";
 
 /**
  * Deterministic weather-suitability decision engine for agriculture.
@@ -22,8 +23,18 @@ export function evaluateFarmerWeatherAdvisory(
   cropId: CropId,
   stageId: StageId
 ): FarmerDecisionResult {
-  const crop = CROPS.find((c) => c.id === cropId) || CROPS[0];
+  const catalogCrop = findCropById(cropId);
+  const fallbackCrop = CROPS.find((c) => c.id === cropId) || CROPS[0];
+  const crop = catalogCrop
+    ? {
+        id: catalogCrop.id,
+        nameEn: catalogCrop.nameEn,
+        nameHi: catalogCrop.nameHi,
+        iconName: catalogCrop.iconName,
+      }
+    : fallbackCrop;
   const stage = STAGES.find((s) => s.id === stageId) || STAGES[1];
+
 
   // Rule: Insufficient Data Check
   if (!weather || !weather.current || !weather.hourly || weather.hourly.length === 0) {

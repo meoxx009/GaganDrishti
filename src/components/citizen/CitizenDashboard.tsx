@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, RefreshCw, ShieldAlert, Sparkles, Database } from "lucide-react";
+import { AlertTriangle, RefreshCw, ShieldAlert } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useWeather } from "@/context/WeatherContext";
 import { CitizenSmartSummary } from "./CitizenSmartSummary";
 import { CitizenHeroMetrics } from "./CitizenHeroMetrics";
 import { CitizenHourly12H } from "./CitizenHourly12H";
 import { CitizenDaily5D } from "./CitizenDaily5D";
+import { ForecastModelPanel } from "@/components/weather/ForecastModelPanel";
+import { MobileWeatherCard } from "@/components/weather/MobileWeatherCard";
 
 export const CitizenDashboard: React.FC = () => {
   const { language } = useApp();
@@ -65,18 +67,28 @@ export const CitizenDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 lg:pb-0">
       {/* 1. Deterministic Smart Summary Advisory */}
       <CitizenSmartSummary />
 
-      {/* 2. Hero Weather Metrics Section */}
-      <CitizenHeroMetrics />
+      {/* FINAL_006 Step 5: Mobile-only compact weather card (hidden on lg+) */}
+      <MobileWeatherCard />
+
+      {/* 2. Hero Weather Metrics Section — hidden on mobile (use MobileWeatherCard instead) */}
+      <div className="hidden lg:block">
+        <CitizenHeroMetrics />
+      </div>
 
       {/* 3. Next 12-Hour Forecast (Horizontally Scrollable) */}
       <CitizenHourly12H />
 
-      {/* 4. 5-Day Synoptic Outlook */}
-      <CitizenDaily5D />
+      {/* 4. 5-Day Synoptic Outlook — hidden on mobile (shown collapsed in MobileWeatherCard) */}
+      <div className="hidden lg:block">
+        <CitizenDaily5D />
+      </div>
+
+      {/* 5. NWP Multi-Model Numerical Comparison (ECMWF vs GFS) */}
+      <ForecastModelPanel />
     </div>
   );
 };

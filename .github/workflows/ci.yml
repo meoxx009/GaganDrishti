@@ -1,0 +1,33 @@
+name: GaganDrishti CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-build:
+    name: TypeScript Check & Next.js Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Static Type Check (tsc)
+        run: npx tsc --noEmit
+
+      - name: Build Next.js Application (Turbopack)
+        run: npm run build
+        env:
+          NODE_ENV: production

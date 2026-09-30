@@ -8,6 +8,22 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   isFallback?: boolean;
+  evidence?: ChatEvidencePackage;
+}
+
+export interface ChatHistoryItem {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatEvidencePackage {
+  intent: string;
+  resolvedLocation: string;
+  targetWindow: string;
+  weatherVariable: string;
+  keyMetrics: Record<string, string | number | boolean>;
+  source: string;
+  timestamp: string;
 }
 
 export interface ChatApiRequest {
@@ -17,10 +33,12 @@ export interface ChatApiRequest {
   weather: NormalizedWeatherData | null;
   selectedCrop?: CropId;
   selectedStage?: StageId;
+  history?: ChatHistoryItem[];
 }
 
 export interface ChatApiResponse {
   reply: string;
   isFallback: boolean;
   modelUsed?: string;
+  evidence?: ChatEvidencePackage;
 }

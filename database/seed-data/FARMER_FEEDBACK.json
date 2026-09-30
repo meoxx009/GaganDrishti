@@ -1,0 +1,35 @@
+[
+  {
+    "feedback_id": "fb_1001",
+    "farmer_name": "Rameshwar Patidar",
+    "phone_number": "+919826012345",
+    "pincode": "462001",
+    "village_name": "Kolar",
+    "crop_name": "Soybean",
+    "crop_stage": "Flowering",
+    "activity_today": "Spraying",
+    "action_taken": "Applied Neem oil 5ml/liter for early aphid control",
+    "weather_today": "Clear skies with light afternoon breeze",
+    "pest_observed": true,
+    "pest_name": "Aphids",
+    "outcome_rating": 5,
+    "outcome_notes": "Spraying was timely, pest completely controlled",
+    "timestamp": "2026-09-28T09:30:00.000Z"
+  },
+  {
+    "feedback_id": "fb_1002",
+    "farmer_name": "Bhagwan Singh",
+    "phone_number": "+919425098765",
+    "pincode": "466115",
+    "village_name": "Bilkisganj",
+    "crop_name": "Soybean",
+    "crop_stage": "Pod Formation",
+    "activity_today": "Irrigation",
+    "action_taken": "Furrow irrigation provided due to 5-day dry spell",
+    "weather_today": "Sunny, temperature 32 C, humidity 48%",
+    "pest_observed": false,
+    "outcome_rating": 4,
+    "outcome_notes": "Soil moisture restored before flowering stress",
+    "timestamp": "2026-09-29T11:15:00.000Z"
+  }
+]

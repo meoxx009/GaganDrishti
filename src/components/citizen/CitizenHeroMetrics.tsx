@@ -41,27 +41,23 @@ export const CitizenHeroMetrics: React.FC = () => {
   });
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-gradient-to-br from-[#0D1B2A]/90 via-[#07111F]/90 to-slate-950 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-      {/* Background ambient lighting */}
-      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
-
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800/40 bg-white dark:bg-[#080E14] p-6 sm:p-8 shadow-xs">
       {/* Top Header: Location, Open-Meteo attribution, Last updated, Refresh */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/40 pb-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-inner">
-            <MapPin className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 border border-sky-100 dark:bg-sky-500/10 dark:border-sky-500/20 text-sky-600 dark:text-sky-400">
+            <MapPin className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-baseline gap-2">
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-[#F8FAFC]">
                 {cityName}
               </h2>
-              <span className="text-xs sm:text-sm font-medium text-slate-400">
+              <span className="text-xs sm:text-sm font-medium text-slate-500 dark:text-[#7F91A3]">
                 ({stateName})
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-cyan-400 font-mono mt-0.5">
+            <div className="flex items-center gap-2 text-[10.5px] text-sky-600 dark:text-sky-400 font-mono mt-0.5">
               <Compass className="h-3 w-3" />
               <span>
                 {city.lat.toFixed(4)}°N, {city.lon.toFixed(4)}°E
@@ -73,18 +69,18 @@ export const CitizenHeroMetrics: React.FC = () => {
         {/* Status, Updated time & Refresh */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Source Attribution */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-slate-700/60 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-300">
-            <Database className="h-3.5 w-3.5 text-cyan-400" />
-            <span className="font-semibold text-slate-200">Open-Meteo</span>
-            <span className="text-slate-500">•</span>
+          <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800/50 bg-[#F8FAFC] dark:bg-[#0B1219] px-3 py-1.5 text-xs text-slate-600 dark:text-[#CBD5E1]">
+            <Database className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+            <span className="font-semibold text-slate-700 dark:text-[#CBD5E1]">Open-Meteo</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
             {isCached ? (
-              <span className="text-amber-400 font-medium flex items-center gap-1">
+              <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
                 {language === "hi" ? "कैश्ड" : "Cached"} ({updatedTime})
               </span>
             ) : (
-              <span className="text-emerald-400 font-medium flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                 {language === "hi" ? "लाइव" : "Live"} {updatedTime} IST
               </span>
             )}
@@ -95,11 +91,11 @@ export const CitizenHeroMetrics: React.FC = () => {
             onClick={() => refreshWeather(true)}
             disabled={isRefreshing}
             type="button"
-            className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/80 px-3.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800/50 bg-white dark:bg-[#0B1219] hover:bg-[#F8FAFC] dark:hover:bg-[#0E1821] px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-[#CBD5E1] transition-all disabled:opacity-50 shadow-2xs"
             title={language === "hi" ? "मौसम अपडेट करें" : "Refresh Weather"}
           >
             <RefreshCw
-              className={`h-3.5 w-3.5 text-cyan-400 ${
+              className={`h-3.5 w-3.5 text-sky-600 dark:text-sky-400 ${
                 isRefreshing ? "animate-spin" : ""
               }`}
             />
@@ -119,25 +115,25 @@ export const CitizenHeroMetrics: React.FC = () => {
       {/* Main Hero Metric: Large Temperature & Condition */}
       <div className="relative z-10 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-5 flex items-center gap-6">
-          <div className="flex h-24 w-24 sm:h-28 sm:w-28 shrink-0 items-center justify-center rounded-3xl border border-slate-700/60 bg-slate-800/50 shadow-inner">
-            <WeatherIcon name={current.iconName} className="h-14 w-14 sm:h-16 sm:w-16" />
+          <div className="flex h-22 w-22 sm:h-26 sm:w-26 shrink-0 items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-800/60 bg-[#F8FAFC] dark:bg-[#0B1219] shadow-2xs">
+            <WeatherIcon name={current.iconName} className="h-12 w-12 sm:h-14 sm:w-14" />
           </div>
 
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="font-mono text-6xl sm:text-7xl font-extrabold tracking-tighter text-white">
+              <span className="font-mono text-5xl sm:text-6xl font-black tracking-tighter text-slate-900 dark:text-[#F8FAFC]">
                 {current.temperature}
               </span>
-              <span className="text-3xl sm:text-4xl font-bold text-cyan-400">°C</span>
+              <span className="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400">°C</span>
             </div>
 
-            <div className="text-lg sm:text-xl font-bold text-slate-100 mt-1">
+            <div className="text-base sm:text-lg font-bold text-slate-800 dark:text-[#F8FAFC] mt-0.5">
               {conditionLabel}
             </div>
 
-            <div className="text-xs sm:text-sm text-slate-400 mt-1">
+            <div className="text-xs text-slate-500 dark:text-[#7F91A3] mt-0.5">
               {language === "hi" ? "अनुभूत तापमान" : "Feels like"}:{" "}
-              <strong className="text-slate-200 font-mono text-sm">
+              <strong className="text-slate-700 dark:text-[#CBD5E1] font-mono text-xs">
                 {current.apparentTemperature}°C
               </strong>
             </div>
@@ -145,19 +141,19 @@ export const CitizenHeroMetrics: React.FC = () => {
         </div>
 
         {/* 4 Required Primary Citizen Metrics */}
-        <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* 1. Rain Probability */}
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 transition-all hover:border-cyan-500/40">
-            <div className="flex items-center gap-2 text-cyan-400">
-              <Umbrella className="h-4 w-4" />
-              <span className="text-xs font-semibold text-slate-400">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/40 bg-[#F8FAFC] dark:bg-[#0B1219] p-3.5 transition-all hover:border-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-[#0E1821]">
+            <div className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+              <Umbrella className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium text-slate-500 dark:text-[#7F91A3]">
                 {language === "hi" ? "वर्षा संभावना" : "Rain Prob"}
               </span>
             </div>
-            <div className="mt-2.5 font-mono text-2xl font-bold text-slate-100">
+            <div className="mt-2 font-mono text-xl font-bold text-slate-900 dark:text-[#F8FAFC]">
               {currentRainProbability}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 font-mono">
+            <div className="text-[10.5px] text-slate-500 dark:text-[#7F91A3] mt-0.5 font-mono">
               {current.precipitation > 0
                 ? `${current.precipitation} mm`
                 : language === "hi"
@@ -167,17 +163,17 @@ export const CitizenHeroMetrics: React.FC = () => {
           </div>
 
           {/* 2. Humidity */}
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 transition-all hover:border-blue-500/40">
-            <div className="flex items-center gap-2 text-blue-400">
-              <Droplets className="h-4 w-4" />
-              <span className="text-xs font-semibold text-slate-400">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/40 bg-[#F8FAFC] dark:bg-[#0B1219] p-3.5 transition-all hover:border-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-[#0E1821]">
+            <div className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+              <Droplets className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium text-slate-500 dark:text-[#7F91A3]">
                 {language === "hi" ? "आर्द्रता" : "Humidity"}
               </span>
             </div>
-            <div className="mt-2.5 font-mono text-2xl font-bold text-slate-100">
+            <div className="mt-2 font-mono text-xl font-bold text-slate-900 dark:text-[#F8FAFC]">
               {current.relativeHumidity}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1">
+            <div className="text-[10.5px] text-slate-500 dark:text-[#7F91A3] mt-0.5">
               {current.relativeHumidity > 70
                 ? language === "hi"
                   ? "अधिक नमी"
@@ -193,34 +189,34 @@ export const CitizenHeroMetrics: React.FC = () => {
           </div>
 
           {/* 3. Wind Speed */}
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 transition-all hover:border-emerald-500/40">
-            <div className="flex items-center gap-2 text-emerald-400">
-              <Wind className="h-4 w-4" />
-              <span className="text-xs font-semibold text-slate-400">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/40 bg-[#F8FAFC] dark:bg-[#0B1219] p-3.5 transition-all hover:border-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-[#0E1821]">
+            <div className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+              <Wind className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium text-slate-500 dark:text-[#7F91A3]">
                 {language === "hi" ? "हवा की गति" : "Wind Speed"}
               </span>
             </div>
-            <div className="mt-2.5 font-mono text-2xl font-bold text-slate-100">
+            <div className="mt-2 font-mono text-xl font-bold text-slate-900 dark:text-[#F8FAFC]">
               {current.windSpeed}{" "}
-              <span className="text-xs text-slate-400 font-normal">km/h</span>
+              <span className="text-xs text-slate-500 font-normal">km/h</span>
             </div>
-            <div className="text-[11px] text-slate-400 mt-1 font-mono">
+            <div className="text-[10.5px] text-slate-500 dark:text-[#7F91A3] mt-0.5 font-mono">
               {language === "hi" ? "झोंके" : "Gusts"}: {current.windGusts} km/h
             </div>
           </div>
 
           {/* 4. Cloud Cover */}
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 transition-all hover:border-indigo-500/40">
-            <div className="flex items-center gap-2 text-indigo-400">
-              <Cloud className="h-4 w-4" />
-              <span className="text-xs font-semibold text-slate-400">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/40 bg-[#F8FAFC] dark:bg-[#0B1219] p-3.5 transition-all hover:border-slate-300 hover:bg-[#F1F5F9] dark:hover:bg-[#0E1821]">
+            <div className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+              <Cloud className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium text-slate-500 dark:text-[#7F91A3]">
                 {language === "hi" ? "बादल आवरण" : "Cloud Cover"}
               </span>
             </div>
-            <div className="mt-2.5 font-mono text-2xl font-bold text-slate-100">
+            <div className="mt-2 font-mono text-xl font-bold text-slate-900 dark:text-[#F8FAFC]">
               {current.cloudCover}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1">
+            <div className="text-[10.5px] text-slate-500 dark:text-[#7F91A3] mt-0.5">
               {current.cloudCover > 80
                 ? language === "hi"
                   ? "घने बादल"
@@ -239,3 +235,4 @@ export const CitizenHeroMetrics: React.FC = () => {
     </div>
   );
 };
+

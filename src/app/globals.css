@@ -3,40 +3,47 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand-bg: #07111F;
-  --color-brand-surface: #0D1B2A;
+  --color-brand-bg: #030609;
+  --color-brand-surface: #080E14;
   --color-brand-primary: #10B981;
   --color-brand-weather: #38BDF8;
   --color-brand-cyan: #22D3EE;
   --color-brand-warning: #F59E0B;
   --color-brand-danger: #EF4444;
   --color-brand-text: #F8FAFC;
-  --color-brand-muted: #94A3B8;
+  --color-brand-muted: #7F91A3;
 }
 
 :root {
-  --bg-page: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #f1f5f9;
-  --border-subtle: #e2e8f0;
-  --border-prominent: #cbd5e1;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(226, 232, 240, 0.8);
+  --bg-page: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F8FAFC;
+  --bg-surface-hover: #F1F5F9;
+  --bg-input: #FFFFFF;
+  --border-subtle: #E2E8F0;
+  --border-prominent: #CBD5E1;
+  --text-main: #111827;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --glass-bg: #FFFFFF;
+  --glass-border: #E2E8F0;
 }
 
 .dark {
-  --bg-page: #07111f;
-  --bg-surface: #0d1b2a;
-  --bg-surface-elevated: #132438;
-  --border-subtle: rgba(148, 163, 184, 0.12);
-  --border-prominent: rgba(148, 163, 184, 0.22);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --glass-bg: rgba(13, 27, 42, 0.75);
-  --glass-border: rgba(56, 189, 248, 0.15);
+  --bg-page: #030609;
+  --bg-surface: #080E14;
+  --bg-surface-elevated: #0B1219;
+  --bg-surface-hover: #0E1821;
+  --bg-input: #060C12;
+  --border-subtle: rgba(148, 163, 184, 0.13);
+  --border-prominent: rgba(56, 189, 248, 0.30);
+  --text-main: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #7F91A3;
+  --glass-bg: rgba(8, 14, 20, 0.94);
+  --glass-border: rgba(148, 163, 184, 0.13);
 }
+
 
 body {
   background-color: var(--bg-page);
@@ -68,3 +75,60 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.4);
 }
+
+/* Safe area padding utilities for mobile PWA */
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-area-pt {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+/* FINAL_006: Mobile-First Touch Target & Responsive Utilities */
+
+/* Minimum touch targets for farm field usage */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+.touch-target-sm {
+  min-height: 44px;
+}
+
+/* Mobile-first typography */
+.text-mobile-base {
+  font-size: 1rem;    /* 16px */
+  line-height: 1.5;
+}
+.text-mobile-lg {
+  font-size: 1.125rem;
+}
+
+/* Bottom navigation spacer — prevents content hiding behind mobile nav */
+.mobile-nav-spacer {
+  height: 4.5rem; /* 72px — matches bottom nav height */
+  display: block;
+}
+@media (min-width: 1024px) {
+  .mobile-nav-spacer { display: none; }
+}
+
+/* High contrast mode (Step 3) */
+.high-contrast {
+  --bg-page: #0d1b0c;
+  --bg-surface: #1a1a1a;
+  --bg-surface-elevated: #1f2f1f;
+  --text-main: #ffffff;
+  --text-secondary: #f0f0f0;
+  --text-muted: #cccccc;
+  --border-subtle: rgba(120, 255, 60, 0.25);
+  --border-prominent: rgba(120, 255, 60, 0.5);
+  --color-brand-primary: #76ff03;
+  --color-brand-warning: #ffff00;
+  --color-brand-danger: #ff4444;
+}
+
+/* Low bandwidth text-only substitutes */
+.lbm-hide { display: none !important; }
+.lbm-text-only { display: block !important; }

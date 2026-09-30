@@ -42,25 +42,25 @@ export const CitizenSmartSummary: React.FC = () => {
     switch (summary.severity) {
       case "warning":
         return {
-          border: "border-sky-500/40",
-          bg: "from-sky-950/40 via-slate-900/60 to-slate-950/80",
-          badgeBg: "bg-sky-500/15 border-sky-500/30 text-sky-300",
-          bulletColor: "text-sky-400",
+          border: "border-sky-200 dark:border-sky-500/30",
+          bg: "bg-white dark:bg-[#080E14]",
+          badgeBg: "bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/10 dark:border-sky-500/30 dark:text-sky-400",
+          bulletColor: "text-sky-600 dark:text-sky-400",
         };
       case "caution":
         return {
-          border: "border-amber-500/40",
-          bg: "from-amber-950/30 via-slate-900/60 to-slate-950/80",
-          badgeBg: "bg-amber-500/15 border-amber-500/30 text-amber-300",
-          bulletColor: "text-amber-400",
+          border: "border-amber-200 dark:border-amber-500/30",
+          bg: "bg-white dark:bg-[#080E14]",
+          badgeBg: "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-400",
+          bulletColor: "text-amber-600 dark:text-amber-400",
         };
       case "success":
       default:
         return {
-          border: "border-emerald-500/40",
-          bg: "from-emerald-950/30 via-slate-900/60 to-slate-950/80",
-          badgeBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-          bulletColor: "text-emerald-400",
+          border: "border-slate-200 dark:border-slate-800/40",
+          bg: "bg-white dark:bg-[#080E14]",
+          badgeBg: "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400",
+          bulletColor: "text-emerald-600 dark:text-emerald-400",
         };
     }
   };
@@ -69,46 +69,46 @@ export const CitizenSmartSummary: React.FC = () => {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl border ${theme.border} bg-gradient-to-br ${theme.bg} p-6 sm:p-7 backdrop-blur-xl shadow-xl transition-all`}
+      className={`relative overflow-hidden rounded-3xl border ${theme.border} ${theme.bg} p-6 sm:p-7 shadow-xs transition-all`}
     >
       <div className="relative z-10 flex flex-col gap-4">
         {/* Top Header Row: Badge & Smart Summary Pill */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/70 border border-slate-700/50 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700/50 shadow-2xs">
               {getIcon()}
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-sky-600 dark:text-cyan-400" />
                 {language === "hi"
                   ? "नागरिक दैनिक मौसम सारांश (स्मार्ट इंटेलिजेंस)"
                   : "Citizen Smart Advisory (Deterministic)"}
               </span>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-100 mt-0.5">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                 {summary.title}
               </h3>
             </div>
           </div>
 
           <span
-            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${theme.badgeBg}`}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${theme.badgeBg}`}
           >
             {summary.badge}
           </span>
         </div>
 
         {/* Narrative Description */}
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-4xl">
+        <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed max-w-4xl">
           {summary.advisory}
         </p>
 
         {/* Actionable Tips Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-800/80">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
           {summary.tips.map((tip, index) => (
             <div
               key={index}
-              className="flex items-start gap-2 rounded-xl bg-slate-950/40 p-2.5 text-xs text-slate-300 border border-slate-800/60"
+              className="flex items-start gap-2 rounded-xl bg-[#F8FAFC] dark:bg-[#0B1219] p-2.5 text-xs text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800/60"
             >
               <ArrowRight
                 className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${theme.bulletColor}`}

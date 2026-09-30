@@ -1,4 +1,4 @@
-export type SpeechLanguage = "en" | "hi";
+export type SpeechLanguage = "en" | "hi" | "mr";
 
 export interface SpeechRecognitionResultState {
   isSupported: boolean;

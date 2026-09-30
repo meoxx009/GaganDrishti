@@ -8,7 +8,7 @@ import {
 import { interpretWMOCode } from "./wmo";
 
 const OPEN_METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast";
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes fresh window
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours fresh cache window (FINAL_001)
 const STORAGE_PREFIX = "gagandrishti_weather_cache_";
 
 interface CacheEntry {

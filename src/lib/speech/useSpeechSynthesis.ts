@@ -75,8 +75,8 @@ export function useSpeechSynthesis() {
     (lang: SpeechLanguage): SpeechSynthesisVoice | null => {
       if (voices.length === 0) return null;
 
-      const targetLocale = lang === "hi" ? "hi-in" : "en-in";
-      const targetPrefix = lang === "hi" ? "hi" : "en";
+      const targetLocale = lang === "hi" ? "hi-in" : lang === "mr" ? "mr-in" : "en-in";
+      const targetPrefix = lang === "hi" ? "hi" : lang === "mr" ? "mr" : "en";
 
       // 1. Exact locale match: en-IN or hi-IN
       const exactMatch = voices.find(

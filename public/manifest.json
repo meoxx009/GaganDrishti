@@ -1,0 +1,90 @@
+{
+  "name": "GaganDrishti - Kheti Ka Manchitra",
+  "short_name": "GaganDrishti",
+  "description": "Weather intelligence aur agricultural advisory for Indian farmers. Real-time weather + crop-specific decisions + pest forecasting.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#166534",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-192x192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/images/screenshot-2.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Weather",
+      "short_name": "Mausam",
+      "description": "Check current weather",
+      "url": "/?tab=weather&utm_source=pwa",
+      "icons": [
+        {
+          "src": "/images/icon-weather-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Farm Advisory",
+      "short_name": "Advice",
+      "description": "Get today's farm decision",
+      "url": "/?tab=farmer&utm_source=pwa",
+      "icons": [
+        {
+          "src": "/images/icon-advice-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Pest Forecast",
+      "short_name": "Pests",
+      "description": "Check pest risk next 7 days",
+      "url": "/farmer-feedback?utm_source=pwa",
+      "icons": [
+        {
+          "src": "/images/icon-pest-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "categories": ["productivity", "agriculture"]
+}
